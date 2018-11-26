@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zzyy.mapper.BootLogMapper">
+  <resultMap id="BaseResultMap" type="com.zzyy.entity.BootLog">
+    <id column="log_Id" jdbcType="BIGINT" property="logId" />
+    <result column="log_client_ip" jdbcType="VARCHAR" property="logClientIp" />
+    <result column="log_url" jdbcType="VARCHAR" property="logUrl" />
+    <result column="log_method" jdbcType="VARCHAR" property="logMethod" />
+    <result column="log_param" jdbcType="VARCHAR" property="logParam" />
+    <result column="log_session" jdbcType="VARCHAR" property="logSession" />
+    <result column="log_time" jdbcType="TIMESTAMP" property="logTime" />
+    <result column="log_return_time" jdbcType="TIMESTAMP" property="logReturnTime" />
+    <result column="log_return_data" jdbcType="VARCHAR" property="logReturnData" />
+    <result column="log_return_status" jdbcType="BIGINT" property="logReturnStatus" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from boot_log
+    where log_Id = #{logId,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.zzyy.entity.BootLog">
+    insert into boot_log (log_Id, log_client_ip, log_url, 
+      log_method, log_param, log_session, 
+      log_time, log_return_time, log_return_data, 
+      log_return_status)
+    values (#{logId,jdbcType=BIGINT}, #{logClientIp,jdbcType=VARCHAR}, #{logUrl,jdbcType=VARCHAR}, 
+      #{logMethod,jdbcType=VARCHAR}, #{logParam,jdbcType=VARCHAR}, #{logSession,jdbcType=VARCHAR}, 
+      #{logTime,jdbcType=TIMESTAMP}, #{logReturnTime,jdbcType=TIMESTAMP}, #{logReturnData,jdbcType=VARCHAR}, 
+      #{logReturnStatus,jdbcType=BIGINT})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.zzyy.entity.BootLog">
+    update boot_log
+    set log_client_ip = #{logClientIp,jdbcType=VARCHAR},
+      log_url = #{logUrl,jdbcType=VARCHAR},
+      log_method = #{logMethod,jdbcType=VARCHAR},
+      log_param = #{logParam,jdbcType=VARCHAR},
+      log_session = #{logSession,jdbcType=VARCHAR},
+      log_time = #{logTime,jdbcType=TIMESTAMP},
+      log_return_time = #{logReturnTime,jdbcType=TIMESTAMP},
+      log_return_data = #{logReturnData,jdbcType=VARCHAR},
+      log_return_status = #{logReturnStatus,jdbcType=BIGINT}
+    where log_Id = #{logId,jdbcType=BIGINT}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select log_Id, log_client_ip, log_url, log_method, log_param, log_session, log_time, 
+    log_return_time, log_return_data, log_return_status
+    from boot_log
+    where log_Id = #{logId,jdbcType=BIGINT}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select log_Id, log_client_ip, log_url, log_method, log_param, log_session, log_time, 
+    log_return_time, log_return_data, log_return_status
+    from boot_log
+  </select>
+</mapper>

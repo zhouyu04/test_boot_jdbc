@@ -2,6 +2,7 @@ package com.zzyy.controller;
 
 
 import com.zzyy.entity.User;
+import com.zzyy.exception.CustomException;
 import com.zzyy.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +22,7 @@ public class LoginController {
     UserService userService;
 
 
-    @RequestMapping("login")
+    @RequestMapping("/login")
     public String login(String username, String password, HttpServletRequest request) {
 
         logger.info("login");
@@ -29,9 +30,9 @@ public class LoginController {
 
         //查询用户
         User user = userService.queryUser(username, password);
-
         if (user == null) {
-            result = "用户不存在";
+//            result = "用户不存在";
+            throw new CustomException("600", "用户不存在");
         }
         request.getSession().setAttribute("session_user", user);
         return result;

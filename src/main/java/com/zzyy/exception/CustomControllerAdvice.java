@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @ControllerAdvice
+@ResponseBody
 public class CustomControllerAdvice {
 
     private static Logger logger = LoggerFactory.getLogger(CustomControllerAdvice.class);
@@ -21,7 +22,6 @@ public class CustomControllerAdvice {
      * @param ex
      * @return
      */
-    @ResponseBody
     @ExceptionHandler(value = Exception.class)
     public Map errorHandler(Exception ex) {
         Map map = new HashMap();
@@ -35,7 +35,6 @@ public class CustomControllerAdvice {
     /**
      * 自定义异常
      */
-    @ResponseBody
     @ExceptionHandler(value = CustomException.class)
     public Map CustomExceptionHandler(CustomException ex) {
         Map map = new HashMap();

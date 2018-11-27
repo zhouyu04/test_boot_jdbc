@@ -2,18 +2,26 @@ package com.zzyy.interceptor;
 
 import com.alibaba.fastjson.JSON;
 import com.zzyy.entity.BootLog;
+import com.zzyy.mapper.BootLogMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.Nullable;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import static com.zzyy.utils.IPUtils.getIPClient;
+
+@Component
 public class LogHandlerInterceptor implements HandlerInterceptor {
 
     private static Logger log = LoggerFactory.getLogger(LogHandlerInterceptor.class);
+
 
     /**
      * 前置
@@ -32,10 +40,18 @@ public class LogHandlerInterceptor implements HandlerInterceptor {
         String requestURI = request.getRequestURI();
         String paramter = JSON.toJSONString(request.getParameterMap());
         //客户端ip
-//        request.get
+        String ipClient = getIPClient(request);
+        String method = request.getMethod();
+        bl.setLogClientIp(ipClient);
+        bl.setLogMethod(method);
+        bl.setLogParam(paramter);
+        bl.setLogUrl(requestURI);
+        bl.setLogSession(requestedSessionId);
 
-
-        return false;
+        BootLogMapper bootLogMapper = getDao(BootLogMapper.class, request);
+        log.info("添加日志" + bl.toString());
+        bootLogMapper.insert(bl);
+        return true;
     }
 
     @Override
@@ -55,5 +71,23 @@ public class LogHandlerInterceptor implements HandlerInterceptor {
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable Exception ex) throws Exception {
 
+
+        int status = response.getStatus();
+
     }
+
+
+    /**
+     * 功能描述:
+     * 在拦截器无法使用自动注入
+     * 通过该方法获得的applicationContext 已经是初始化之后的applicationContext 容器
+     *
+     * @auther: zhouyu
+     * @date: 2018/11/27 20:46
+     */
+    public <T> T getDao(Class<T> clazz, HttpServletRequest request) {
+        WebApplicationContext applicationContext = WebApplicationContextUtils.getRequiredWebApplicationContext(request.getServletContext());
+        return applicationContext.getBean(clazz);
+    }
+
 }

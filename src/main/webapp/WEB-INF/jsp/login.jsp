@@ -11,7 +11,7 @@
     <title>login</title>
 </head>
 <body>
-    <form method="get" action="/user/login">
+    <form method="post" action="/user/login">
         用户名：<input type="test" name="username"/><br>
         密码：<input type="password" name="password"><br>
         <input type="submit" value="登录">

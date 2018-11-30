@@ -1,8 +1,10 @@
 package com.zzyy.entity;
 
+import com.alibaba.fastjson.serializer.JSONSerializableSerializer;
+
 import java.util.Date;
 
-public class User {
+public class User extends JSONSerializableSerializer{
     private Long id;
 
     private String username;

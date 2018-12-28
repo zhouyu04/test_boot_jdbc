@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("/user")
@@ -23,7 +24,7 @@ public class LoginController {
 
 
     @RequestMapping("/login")
-    public String login(String username, String password, HttpServletRequest request) {
+    public String login(String username, String password, HttpServletRequest request, HttpServletResponse response) {
 
         logger.info("login");
         String result = "登录成功";
@@ -32,6 +33,7 @@ public class LoginController {
         User user = userService.queryUser(username, password);
         if (user == null) {
 //            result = "用户不存在";
+            response.setStatus(600);
             throw new CustomException("600", "用户不存在");
         }
         request.getSession().setAttribute("session_user", user);

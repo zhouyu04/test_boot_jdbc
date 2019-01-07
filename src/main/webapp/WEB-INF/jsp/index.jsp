@@ -12,5 +12,10 @@
 </head>
 <body>
     大爷进来玩啊！！！
+
+    <br/>
+
+    <a href="/user/toChat">确认进入</a>
+
 </body>
 </html>

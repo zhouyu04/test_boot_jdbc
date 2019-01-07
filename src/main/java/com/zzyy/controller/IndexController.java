@@ -1,6 +1,5 @@
 package com.zzyy.controller;
 
-import com.zzyy.interceptor.SessionInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -13,17 +12,23 @@ public class IndexController {
 
     private static Logger logger = LoggerFactory.getLogger(IndexController.class);
 
-    @RequestMapping(value = "/toLogin",method = RequestMethod.GET)
-    public String toLogin(){
+    @RequestMapping(value = "/toLogin", method = RequestMethod.GET)
+    public String toLogin() {
 
         logger.info("toLogin");
         return "login";
     }
 
-    @RequestMapping(value = "/index",method = RequestMethod.GET)
-    public String index(){
+    @RequestMapping(value = "/index", method = RequestMethod.GET)
+    public String index() {
 
         logger.info("index");
         return "index";
+    }
+
+    @RequestMapping(value = "/toChat", method = RequestMethod.GET)
+    public String toChat() {
+        logger.info("toChat");
+        return "chat";
     }
 }

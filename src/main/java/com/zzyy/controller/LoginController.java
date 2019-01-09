@@ -7,13 +7,14 @@ import com.zzyy.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-@RestController
+@Controller
 @RequestMapping("/user")
 public class LoginController {
 
@@ -37,6 +38,6 @@ public class LoginController {
             throw new CustomException("600", "用户不存在");
         }
         request.getSession().setAttribute("session_user", user);
-        return result;
+        return "redirect:/user/index";
     }
 }

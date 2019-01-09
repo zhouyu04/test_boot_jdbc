@@ -28,6 +28,7 @@
     <button id="sendButton">发送</button>
 </div>
 
+<input id="user-name-label" type="text" readonly="readonly">
 </body>
 
 <script type="application/javascript">
@@ -49,19 +50,25 @@
             alert("请输入1-100");
             return;
         }
-        socket = new WebSocket("ws://localhost:8080/websocket/"+number);
+        socket = new WebSocket("ws://47.107.171.112:8081/websocket/"+number);
 
         //打开事件
         socket.onopen = function() {
-            console.log("Socket 已打开");
-            $("#connectInput").val("Socket 已打开-编号【"+number+"】")
+            console.log("已连接");
+            $("#connectInput").val("已连接-编号【"+number+"】")
         };
 
         //获得消息事件
         socket.onmessage = function(msg) {
             console.log(msg.data);
-            $("#message").val(msg.data)
+            var exist = $("#message").val() + "\n";
             //发现消息进入 开始处理前端触发逻辑
+            var data = msg.data;
+            var split = data.split("*当前用户*");
+            var message = split[0];
+            var username = split[1];
+            $("#message").val(exist + message);
+            $("#user-name-label").val(username);
         };
 
         //发生了错误事件
@@ -69,29 +76,41 @@
             alert("Socket发生了错误");
             //此时可以尝试刷新页面
         }
+
+        //发送消息事件
+        // socket.send = function (msg){
+        //     console.log(msg.data);
+        // }
+
+        //关闭事件
+        socket.onclose = function(socket) {
+            console.log("Socket已关闭");
+            $("#close").val("Socket已关闭")
+        };
+
+        //离开页面时，关闭socket
+        $(window).unload(function() {
+            socket.close();
+        });
     });
 
     //断开连接
     $("#disconnect").click(function () {
         //关闭事件
-        socket.onclose = function() {
-            console.log("Socket已关闭");
-            $("#close").val("Socket已关闭")
-        };
+        onclose();
     });
 
     //发送消息
     $("#sendButton").click(function () {
         var message = $("#send").val();
+        console.log("message-->"+message);
         if (message == null ){
             alert("发送内容不能为空!");
         }
         //发送消息事件
-        socket.send = function (msg){
-            console.log(msg.data);
-        }
+        socket.send(message);
+        $("#send").val("");
     });
-
 
     //离开页面时，关闭socket
     $(window).unload(function() {

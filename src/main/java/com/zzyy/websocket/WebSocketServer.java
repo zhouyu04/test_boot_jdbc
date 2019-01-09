@@ -1,5 +1,6 @@
 package com.zzyy.websocket;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -32,6 +33,8 @@ public class WebSocketServer {
     //接收sid
     private String sid = "";
 
+    private String user = "";
+
     /**
      * 功能描述: 开启连接
      *
@@ -46,8 +49,9 @@ public class WebSocketServer {
         addOnlineCount();
         logger.info("有新窗口开始监听:" + sid + ",当前在线人数为" + getOnlineCount());
         this.sid = sid;
+        this.user = "当前用户:" + sid;
         try {
-            sendMessage("连接成功");
+            sendMessage("【" + sid + "】连接成功" + "*当前用户*" + user);
         } catch (IOException e) {
             logger.error("websocket IO异常");
         }
@@ -61,10 +65,12 @@ public class WebSocketServer {
      */
     @OnClose
     public void onClose() {
+        String sid = this.sid;
         webSocketSet.remove(this);
         //从set中删除，在线数减1
         subOnlineCount();
-        logger.info("有一连接关闭！当前在线人数为" + getOnlineCount());
+        user = StringUtils.remove(user, "、" + sid);
+        logger.info(sid + "连接关闭！当前在线人数为" + getOnlineCount());
     }
 
     /**
@@ -79,9 +85,9 @@ public class WebSocketServer {
         //群发消息
         for (WebSocketServer item : webSocketSet) {
             try {
-                item.sendMessage(message);
+                item.sendMessage("【" + sid + "】:" + message);
             } catch (IOException e) {
-                logger.error("IO 异常",e);
+                logger.error("IO 异常", e);
             }
         }
     }
@@ -125,7 +131,7 @@ public class WebSocketServer {
                     item.sendMessage(message);
                 }
             } catch (IOException e) {
-                logger.error("IO 异常",e);
+                logger.error("IO 异常", e);
                 continue;
             }
         }

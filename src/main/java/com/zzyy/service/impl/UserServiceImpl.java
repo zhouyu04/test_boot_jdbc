@@ -19,7 +19,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public User queryUser(String username, String password) {
-
+        //dshdahjkhkshdja12323212121321
         User user = userMapper.queryUser(username, password);
         redisTemplate.opsForList().leftPush("user",user.toString());
         return user;

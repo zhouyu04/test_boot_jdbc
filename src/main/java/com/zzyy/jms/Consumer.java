@@ -1,11 +1,8 @@
 package com.zzyy.jms;
 
-import org.apache.activemq.ActiveMQConnectionFactory;
 import org.springframework.jms.annotation.JmsListener;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Component;
-
-import javax.jms.*;
-import java.io.IOException;
 
 /**
  * @Auther: zhouyu
@@ -17,10 +14,31 @@ public class Consumer {
 
     // 使用JmsListener配置消费者监听的队列，其中text是接收到的消息
     @JmsListener(destination = "queue-product-demo")
-    public void receiveQueue(String text) {
-        System.out.println("Consumer收到的报文为:"+text);
+    @SendTo("consumer-2")
+    public String receiveQueue(String text) {
+        System.out.println("Consumer收到的报文为:" + text);
+        return "demo - to - con2";
     }
 
+    @JmsListener(destination = "consumer-2")
+    public void receiveQueue2(String text) {
+        System.out.println("消费者2收到消息" + text);
+    }
+
+    @JmsListener(destination = "topic-demo")
+    public void receiveTopic(String text) {
+        System.out.println("消费者1收到消息" + text);
+    }
+
+    @JmsListener(destination = "topic-demo")
+    public void receiveTopic2(String text) {
+        System.out.println("消费者2收到消息" + text);
+    }
+
+    @JmsListener(destination = "topic-demo")
+    public void receiveTopic3(String text) {
+        System.out.println("消费者3收到消息" + text);
+    }
 
 
 //    public static void main(String[] args) throws JMSException {

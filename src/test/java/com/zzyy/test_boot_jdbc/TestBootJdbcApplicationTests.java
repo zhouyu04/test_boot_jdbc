@@ -9,6 +9,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.Topic;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -19,11 +21,29 @@ public class TestBootJdbcApplicationTests {
 	@Test
 	public void contextLoads() {
 
-		Destination destination = new ActiveMQQueue("queue-product-demo");
+		//-----------------------------测试点对点-------------------------------------
+//		Destination destination = new ActiveMQQueue("queue-product-demo");
+//		Destination destination2 = new ActiveMQQueue("consumer-2");
+//		for(int i=0; i<10; i++){
+//			producer.sendMessage(destination, "myname is chhliu!!!");
+//		}
+//		for(int i=0; i<10; i++){
+//			producer.sendMessage(destination2, "myname is zzyy!!!");
+//		}
+		//-----------------------------测试点对点-------------------------------------
 
-		for(int i=0; i<100; i++){
-			producer.sendMessage(destination, "myname is chhliu!!!");
+		Topic topic = new Topic() {
+			@Override
+			public String getTopicName() throws JMSException {
+				return "topic-demo";
+			}
+		};
+
+		for (int i = 0;i<50;i++){
+			producer.sendTopic(topic,"第一测试");
 		}
+
+
 	}
 
 }

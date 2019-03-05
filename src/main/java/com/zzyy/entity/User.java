@@ -17,6 +17,8 @@ public class User extends JSONSerializableSerializer{
 
     private Date modifytime;
 
+    private Integer age;
+
     public Long getId() {
         return id;
     }
@@ -63,5 +65,13 @@ public class User extends JSONSerializableSerializer{
 
     public void setModifytime(Date modifytime) {
         this.modifytime = modifytime;
+    }
+
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
     }
 }

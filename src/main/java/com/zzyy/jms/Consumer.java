@@ -4,6 +4,8 @@ import org.springframework.jms.annotation.JmsListener;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Component;
 
+import javax.jms.MessageListener;
+
 /**
  * @Auther: zhouyu
  * @Date: 2019/1/14 16:07
@@ -14,28 +16,28 @@ public class Consumer {
 
     // 使用JmsListener配置消费者监听的队列，其中text是接收到的消息
     @JmsListener(destination = "queue-product-demo")
-    @SendTo("consumer-2")
-    public String receiveQueue(String text) {
+//    @SendTo("consumer-2")
+    public void receiveQueue(String text) {
         System.out.println("Consumer收到的报文为:" + text);
-        return "demo - to - con2";
+//        return "demo - to - con2";
     }
 
-    @JmsListener(destination = "consumer-2")
+    @JmsListener(destination = "queue-product-demo")
     public void receiveQueue2(String text) {
         System.out.println("消费者2收到消息" + text);
     }
 
-    @JmsListener(destination = "topic-demo")
+    @JmsListener(destination = "topic-demo",containerFactory = "jmsListenerContainerTopic")
     public void receiveTopic(String text) {
         System.out.println("消费者1收到消息" + text);
     }
 
-    @JmsListener(destination = "topic-demo")
+    @JmsListener(destination = "topic-demo",containerFactory = "jmsListenerContainerTopic")
     public void receiveTopic2(String text) {
         System.out.println("消费者2收到消息" + text);
     }
 
-    @JmsListener(destination = "topic-demo")
+    @JmsListener(destination = "topic-demo",containerFactory = "jmsListenerContainerTopic")
     public void receiveTopic3(String text) {
         System.out.println("消费者3收到消息" + text);
     }

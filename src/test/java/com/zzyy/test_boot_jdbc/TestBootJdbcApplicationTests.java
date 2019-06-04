@@ -19,17 +19,17 @@ public class TestBootJdbcApplicationTests {
 	private Product producer;
 
 	@Test
-	public void contextLoads() {
+	public void contextLoads() throws JMSException {
 
 		//-----------------------------测试点对点-------------------------------------
-//		Destination destination = new ActiveMQQueue("queue-product-demo");
-//		Destination destination2 = new ActiveMQQueue("consumer-2");
-//		for(int i=0; i<10; i++){
-//			producer.sendMessage(destination, "myname is chhliu!!!");
-//		}
-//		for(int i=0; i<10; i++){
-//			producer.sendMessage(destination2, "myname is zzyy!!!");
-//		}
+		Destination destination = new ActiveMQQueue("queue-product-demo");
+		Destination destination2 = new ActiveMQQueue("consumer-2");
+		for(int i=0; i<10; i++){
+			producer.sendMessage(destination, "myname is chhliu!!!");
+		}
+		for(int i=0; i<10; i++){
+			producer.sendMessage(destination2, "myname is zzyy!!!");
+		}
 		//-----------------------------测试点对点-------------------------------------
 
 		Topic topic = new Topic() {

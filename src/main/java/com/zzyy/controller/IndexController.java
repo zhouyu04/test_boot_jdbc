@@ -40,6 +40,12 @@ public class IndexController {
         return "chat";
     }
 
+    @RequestMapping(value = "/toExpressIndex",method = RequestMethod.GET)
+    public String toExpressIndex(){
+        logger.info("toExpressIndex");
+        return "expressIndex";
+    }
+
     /*
      *采用spring提供的上传文件的方法
      */

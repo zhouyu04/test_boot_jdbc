@@ -38,6 +38,6 @@ public class LoginController {
             throw new CustomException("600", "用户不存在");
         }
         request.getSession().setAttribute("session_user", user);
-        return "redirect:/user/index";
+        return "redirect:/user/toExpressIndex";
     }
 }

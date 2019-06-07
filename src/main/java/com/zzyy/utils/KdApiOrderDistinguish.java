@@ -29,7 +29,7 @@ public class KdApiOrderDistinguish {
 	public static void main(String[] args) {
 		KdApiOrderDistinguish api = new KdApiOrderDistinguish();
 		try {
-			String result = api.getOrderTracesByJson("75152228145333");
+			String result = api.getOrderTracesByJson("6611968368152");
 			System.out.print(result);
 			
 		} catch (Exception e) {

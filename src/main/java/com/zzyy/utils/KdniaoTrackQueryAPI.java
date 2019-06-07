@@ -27,7 +27,7 @@ public class KdniaoTrackQueryAPI {
     public static void main(String[] args) {
         KdniaoTrackQueryAPI api = new KdniaoTrackQueryAPI();
         try {
-            String result = api.getOrderTracesByJson("ZTO","75152228145333");
+            String result = api.getOrderTracesByJson("STO","6611968368152");
             System.out.print(result);
 
         } catch (Exception e) {

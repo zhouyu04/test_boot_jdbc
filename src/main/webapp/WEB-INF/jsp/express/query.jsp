@@ -51,6 +51,9 @@
         } else if (cellValue == 4){
             var formatted = "问题件";
             return formatted;
+        } else {
+            var formatted = "暂无信息";
+            return formatted;
         }
     }
 

@@ -125,15 +125,15 @@ public class ExpressController {
         Sheet sheetAt = workbook.getSheetAt(0);
         int lastRowNum = sheetAt.getLastRowNum();
 
-        for (int i = 0; i <= lastRowNum; i++) {
+        for (int i = 0; i < lastRowNum; i++) {
             Row row = sheetAt.getRow(i);
             Cell cell = row.getCell(0);
-
-            String stringCellValue = cell.getStringCellValue();
-            billNo.add(stringCellValue);
+            if (cell != null){
+                String stringCellValue = cell.getStringCellValue();
+                billNo.add(stringCellValue);
+            }
         }
         return billNo;
-
     }
 
 

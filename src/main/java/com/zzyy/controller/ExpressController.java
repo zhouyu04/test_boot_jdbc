@@ -1,6 +1,12 @@
 package com.zzyy.controller;
 
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.zzyy.entity.Express;
+import com.zzyy.service.ExpressService;
+import com.zzyy.utils.KdApiOrderDistinguish;
+import com.zzyy.utils.KdniaoTrackQueryAPI;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -9,14 +15,18 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Auther: zhouyu
@@ -28,6 +38,10 @@ import java.util.List;
 public class ExpressController {
     private static Logger logger = LoggerFactory.getLogger(ExpressController.class);
 
+
+    @Autowired
+    ExpressService expressService;
+
     private static final String SUFFIX_2003 = ".xls";
     private static final String SUFFIX_2007 = ".xlsx";
 
@@ -38,13 +52,16 @@ public class ExpressController {
 
 
     @RequestMapping("/upload")
-    @ResponseBody
-    public String springUpload(@RequestParam("file") MultipartFile file) {
+    public Object springUpload(@RequestParam("file") MultipartFile file) {
+
         if (file.isEmpty()) {
             return "上传失败，请选择文件";
         }
-        String originalFilename = file.getOriginalFilename();
+        Long id = 10086L;
+        expressService.delete(id);
 
+        JSONObject result = new JSONObject();
+        String originalFilename = file.getOriginalFilename();
         Workbook workbook = null;
 
         try {
@@ -58,7 +75,43 @@ public class ExpressController {
         }
 
         List<String> arrays = readExcel(workbook);
-        return null;
+
+        KdApiOrderDistinguish queryOrder = new KdApiOrderDistinguish();
+        KdniaoTrackQueryAPI api = new KdniaoTrackQueryAPI();
+        for (int i =0;i< arrays.size();i++){
+            String logisticCode = arrays.get(i);
+
+            try {
+                String orderTracesByJson = queryOrder.getOrderTracesByJson(logisticCode);
+                if (StringUtils.isNotBlank(orderTracesByJson)){
+                    JSONObject object = JSONObject.parseObject(orderTracesByJson);
+
+                    JSONArray shippers = object.getJSONArray("Shippers");
+                    JSONObject jsonObject = new JSONObject();
+                    if (shippers != null) {
+                        jsonObject = shippers.getJSONObject(0);
+                    }
+                    String shipperCode = jsonObject.getString("ShipperCode");
+
+                    String expressInfo = api.getOrderTracesByJson(shipperCode, logisticCode);
+                    JSONObject expressJson = JSONObject.parseObject(expressInfo);
+
+                    String logisticCode1 = expressJson.getString("LogisticCode");
+                    int state = expressJson.getIntValue("State");
+                    String traces = expressJson.getString("Traces");
+
+                    Express express = new Express();
+                    express.setId(id);
+                    express.setExpressCode(logisticCode1);
+                    express.setStatus(state);
+                    express.setTrace(traces);
+                    expressService.add(express);
+                }
+            } catch (Exception e) {
+                logger.error("未知错误",e);
+            }
+        }
+        return "express/result";
     }
 
     /**
@@ -86,8 +139,26 @@ public class ExpressController {
 
     @RequestMapping("/getData")
     @ResponseBody
-    public String getData() {
-        String jsondata = "{\"page\":\"1\"," + " \"total\":2," + " \"records\":\"13\"," + " \"rows\":" + " [" + " {" + " \"id\":\"13\"," + " \"cell\":" + " [\"13\",\"2007-10-06\",\"Client 3\",\"1000.00\",\"0.00\",\"1000.00\",null]" + " }," + " {" + " \"id\":\"12\"," + " \"cell\":" + " [\"12\",\"2007-10-06\",\"Client 2\",\"700.00\",\"140.00\",\"840.00\",null]" + " }," + " {" + " \"id\":\"11\"," + " \"cell\":" + " [\"11\",\"2007-10-06\",\"Client 1\",\"600.00\",\"120.00\",\"720.00\",null]" + " }," + " {" + " \"id\":\"10\"," + " \"cell\":" + " [\"10\",\"2007-10-06\",\"Client 2\",\"100.00\",\"20.00\",\"120.00\",null]" + " }," + " {" + " \"id\":\"9\"," + " \"cell\":" + " [\"9\",\"2007-10-06\",\"Client 1\",\"200.00\",\"40.00\",\"240.00\",null]" + " }," + " {" + " \"id\":\"8\"," + " \"cell\":" + " [\"8\",\"2007-10-06\",\"Client 3\",\"200.00\",\"0.00\",\"200.00\",null]" + " }," + " {" + " \"id\":\"7\"," + " \"cell\":" + " [\"7\",\"2007-10-05\",\"Client 2\",\"120.00\",\"12.00\",\"134.00\",null]" + " }," + " {" + " \"id\":\"6\"," + " \"cell\":" + " [\"6\",\"2007-10-05\",\"Client 1\",\"50.00\",\"10.00\",\"60.00\",\"\"]" + " }," + " {" + " \"id\":\"5\"," + " \"cell\":" + " [\"5\",\"2007-10-05\",\"Client 3\",\"100.00\",\"0.00\",\"100.00\",\"no tax at all\"]" + " }," + " {" + " \"id\":\"4\"," + " \"cell\":" + " [\"4\",\"2007-10-04\",\"Client 3\",\"150.00\",\"0.00\",\"150.00\",\"no tax\"]" + " }" + " ]," + " \"userdata\":{\"amount\":3220,\"tax\":342,\"total\":3564,\"name\":\"Totals:\"}" + " }";
+    public JSONObject getData(HttpServletRequest request) {
+
+        JSONObject jsondata = new JSONObject();
+        String page = request.getParameter("page");
+        String rows = request.getParameter("rows");
+        Integer pageIndex = Integer.valueOf(page);
+        Integer pageSize = Integer.valueOf(rows);
+        int startIndex = (pageIndex - 1) * pageSize;
+
+        Map<String,Object> params = new HashMap<>();
+        params.put("startIndex",startIndex);
+        params.put("pageSize",pageSize);
+
+        List<Express> expressList = expressService.find(params);
+        long count = expressService.findCount(params);
+
+        jsondata.put("rows",expressList);
+        jsondata.put("page",pageIndex);
+        jsondata.put("total",pageSize);
+        jsondata.put("records",count);
         return jsondata;
     }
 

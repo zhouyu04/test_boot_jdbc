@@ -29,36 +29,42 @@
             src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
     <meta charset="utf-8"/>
 
-    <title>jqGrid Loading Data - Million Rows from a REST service</title>
+    <title>军师很帅</title>
 </head>
 <body>
 
-<div style="margin-left:20px;margin-top: 20px">
 
-    <form name="Form2" action="/express/upload" method="post"  enctype="multipart/form-data">
-        <input type="file"  name="file" value="请选择文件"><input type="submit" value="上传"/>
-    </form>
-
-</div>
 <div style="margin-left:20px;margin-top: 30px">
     <table id="jqGrid"></table>
     <div id="jqGridPager"></div>
 </div>
 </body>
 <script type="text/javascript">
+
+    function formatted(cellValue, options, rowObject) {
+        if (cellValue == 2) {
+            var formatted = "在途中";
+            return formatted;
+        } else if (cellValue == 3){
+            var formatted = "签收";
+            return formatted;
+        } else if (cellValue == 4){
+            var formatted = "问题件";
+            return formatted;
+        }
+    }
+
     $(document).ready(function () {
 
         $("#jqGrid").jqGrid({
-            url: 'http://trirand.com/blog/phpjqgrid/examples/jsonp/getjsonp.php?callback=?&qwery=longorders',
+            url: '/express/getData',
             mtype: "GET",
             styleUI: 'Bootstrap',
-            datatype: "jsonp",
+            datatype: "json",
             colModel: [
-                {label: 'OrderID', name: 'OrderID', key: true, width: 75},
-                {label: 'Customer ID', name: 'CustomerID', width: 150},
-                {label: 'Order Date', name: 'OrderDate', width: 150},
-                {label: 'Freight', name: 'Freight', width: 150},
-                {label: 'Ship Name', name: 'ShipName', width: 150}
+                {label: '快递号', name: 'expressCode', width: 200},
+                {label: '状态', name: 'status', formatter:formatted,width: 150},
+                {label: '物流信息', name: 'trace', width: 1200}
             ],
             viewrecords: true,
             height: 600,

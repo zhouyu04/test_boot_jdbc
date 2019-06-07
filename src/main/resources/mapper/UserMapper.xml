@@ -9,6 +9,14 @@
     <result column="createTime" jdbcType="TIMESTAMP" property="createtime" />
     <result column="modifyTime" jdbcType="TIMESTAMP" property="modifytime" />
   </resultMap>
+
+  <resultMap id="expressMap" type="com.zzyy.entity.Express">
+    <id column="fid" property="id"/>
+    <result column="express_code" property="expressCode"/>
+    <result column="status" property="status"/>
+    <result column="traces" property="trace"/>
+  </resultMap>
+
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
     delete from user
     where id = #{id,jdbcType=BIGINT}
@@ -42,5 +50,22 @@
 
   <select id="queryUser" resultType="com.zzyy.entity.User">
       SELECT * from user WHERE username = #{username} and password = #{password}
+  </select>
+
+  <insert id="addExpress" parameterType="com.zzyy.entity.Express">
+      insert into express(fid,express_code,status,traces)
+      values(#{id},#{expressCode},#{status},#{trace})
+  </insert>
+
+  <delete id="deleteExpress" parameterType="long">
+      DELETE from express where fid = #{id}
+  </delete>
+
+  <select id="findExpress" resultMap="expressMap">
+      SELECT * from express where fid = #{id} order by status desc
+  </select>
+
+  <select id="findExpressCount" resultType="long">
+      SELECT count(*) from express where fid = #{id}
   </select>
 </mapper>

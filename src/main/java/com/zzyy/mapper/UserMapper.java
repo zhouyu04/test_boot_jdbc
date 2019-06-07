@@ -1,5 +1,6 @@
 package com.zzyy.mapper;
 
+import com.zzyy.entity.Express;
 import com.zzyy.entity.User;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.cache.annotation.Cacheable;
@@ -20,4 +21,12 @@ public interface UserMapper {
     int updateByPrimaryKey(User record);
 
     User queryUser(@Param("username") String username, @Param("password") String password);
+
+    void addExpress(Express express);
+
+    void deleteExpress(Long id);
+
+    List<Express> findExpress(long id);
+
+    long findExpressCount(long l);
 }

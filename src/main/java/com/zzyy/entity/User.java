@@ -4,7 +4,7 @@ import com.alibaba.fastjson.serializer.JSONSerializableSerializer;
 
 import java.util.Date;
 
-public class User extends JSONSerializableSerializer{
+public class User extends JSONSerializableSerializer {
     private Long id;
 
     private String username;
@@ -47,21 +47,5 @@ public class User extends JSONSerializableSerializer{
 
     public void setNickname(String nickname) {
         this.nickname = nickname == null ? null : nickname.trim();
-    }
-
-    public Date getCreatetime() {
-        return createtime;
-    }
-
-    public void setCreatetime(Date createtime) {
-        this.createtime = createtime;
-    }
-
-    public Date getModifytime() {
-        return modifytime;
-    }
-
-    public void setModifytime(Date modifytime) {
-        this.modifytime = modifytime;
     }
 }

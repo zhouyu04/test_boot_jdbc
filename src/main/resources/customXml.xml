@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans>
+    <bean>
+        <id>1</id>
+        <score>10</score>
+        <user>
+            <id>07</id>
+            <username>张三</username>
+            <nickname>三</nickname>
+        </user>
+    </bean>
+
+    <bean>
+        <id>2</id>
+        <score>50</score>
+        <user>
+            <id>08</id>
+            <username>李四</username>
+            <nickname>四</nickname>
+        </user>
+    </bean>
+
+    <bean>
+        <id>3</id>
+        <score>100</score>
+        <user>
+            <id>09</id>
+            <username>王五</username>
+            <nickname>五</nickname>
+        </user>
+    </bean>
+
+
+</beans>

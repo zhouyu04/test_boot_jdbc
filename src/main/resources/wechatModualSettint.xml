@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans>
+
+    <bean>
+        <touser></touser>
+        <template_id>4E6Q3PcusiJP4JXGBkxHtOyXvtRaMCIBn-3GFZKDWxg</template_id>
+        <template_no>1</template_no>
+        <data>
+            <first></first>
+            <keyword1></keyword1>
+            <keyword2></keyword2>
+            <keyword3></keyword3>
+            <keyword4></keyword4>
+            <remark>欢迎再次光临!</remark>
+        </data>
+    </bean>
+
+    <bean>
+        <touser></touser>
+        <template_id>sExeQtY-ZKGpw_iEdZSmDIil-Eydi2GyqU6TP_HAYyo</template_id>
+        <template_no>2</template_no>
+        <data>
+            <first></first>
+            <keyword1></keyword1>
+            <keyword2></keyword2>
+            <keyword3></keyword3>
+            <keyword4></keyword4>
+            <remark>欢迎再次光临!</remark>
+        </data>
+    </bean>
+
+</beans>

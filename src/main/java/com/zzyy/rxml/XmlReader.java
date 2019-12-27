@@ -4,7 +4,6 @@ import org.dom4j.Attribute;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
-import org.dom4j.tree.DefaultText;
 
 import java.io.File;
 import java.util.Iterator;
@@ -27,12 +26,33 @@ public class XmlReader {
         Document document = reader.read(new File(filePath));
         //3.获取根节点
         Element rootElement = document.getRootElement();
-        Iterator iterator = rootElement.elementIterator();
 
-        recCust(iterator);
+
+        solveXml(rootElement);
 
         return null;
     }
+
+    private static void solveXml(Element rootElement) {
+
+        if (rootElement == null) {
+            return;
+        }
+        List<Element> elements = rootElement.elements();
+        String elementName = rootElement.getName();
+
+        if (elements.size() > 0) {
+
+            for (Element element : elements) {
+                solveXml(element);
+            }
+        } else {
+            String name = rootElement.getName();
+            String stringValue = rootElement.getStringValue();
+            System.out.println("标签名称:" + elementName + "子节点name:" + name + "、value:" + stringValue);
+        }
+    }
+
     /**
      * 功能描述: 递归出所有节点及子节点
      *
@@ -59,7 +79,7 @@ public class XmlReader {
 
                 String name2 = element.getName();
                 String stringValue = element.getStringValue();
-                System.out.println("子节点名称:"+name2+"子节点值:"+stringValue);
+                System.out.println("子节点名称:" + name2 + "子节点值:" + stringValue);
 
             }
         }
@@ -87,7 +107,7 @@ public class XmlReader {
     public static void main(String[] args) {
 
         try {
-            readXml("src\\main\\resources\\customXml.xml");
+            readXml("src\\main\\resources\\wechatModualSettint.xml");
         } catch (Exception e) {
             e.printStackTrace();
         }

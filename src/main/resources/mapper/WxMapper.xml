@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zzyy.mapper.WxMapper">
+
+
+  <insert id="saveVerifyTicket" parameterType="com.zzyy.entity.WxVerifyTicket">
+      insert into t_wx_ticket(fappid,finfoType,fverifyTicket,fcreatetime,fmodifytime)values (
+      #{appId},#{infoType},#{ticket},now(),now())
+    </insert>
+
+  <select id="findByKey" resultType="com.zzyy.entity.WxVerifyTicket">
+        select fappid as "appId",finfotype as "infoType",fverifyticket as "ticket"
+        from t_wx_ticket where fappid =#{appId} and finfotype = #{infoType}
+    </select>
+
+  <update id="updateVerifyTicket" parameterType="com.zzyy.entity.WxVerifyTicket">
+        update t_wx_ticket set fverifyticket = #{ticket} ,fmodifytime = now() where
+        fappid= #{appId} and finfotype = #{infoType}
+    </update>
+
+</mapper>

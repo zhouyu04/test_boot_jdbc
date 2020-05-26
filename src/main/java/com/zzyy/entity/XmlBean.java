@@ -11,10 +11,12 @@ import lombok.Data;
 public class XmlBean {
 
 
-    private Integer id;
+    private String AppId;
 
-    private String score;
+    private String CreateTime;
 
-    private User user;
+    private String InfoType;
+
+    private String ComponentVerifyTicket;
 
 }

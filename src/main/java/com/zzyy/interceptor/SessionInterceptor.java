@@ -23,6 +23,11 @@ public class SessionInterceptor implements HandlerInterceptor {
         if (request.getRequestURI().startsWith("/monitor")) {
             return true;
         }
+
+        if (request.getRequestURI().startsWith("/wx")) {
+            return true;
+        }
+
         Object session_user = request.getSession().getAttribute("session_user");
         if (session_user == null) {
             response.sendRedirect("/user/toLogin");

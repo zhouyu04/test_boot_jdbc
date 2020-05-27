@@ -1,6 +1,6 @@
 package com.zzyy.service;
 
-import org.dom4j.DocumentException;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @Auther: zhouyu
@@ -8,5 +8,5 @@ import org.dom4j.DocumentException;
  * @Description:
  */
 public interface WxService {
-    void saveVerifyTicket(String dataFromRequst) throws DocumentException;
+    void saveVerifyTicket(HttpServletRequest request) throws Exception;
 }

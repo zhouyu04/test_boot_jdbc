@@ -8,12 +8,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Unmarshaller;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
 
 /**
  * @Auther: zhouyu
@@ -32,6 +29,7 @@ public class WxController {
     public String callback(HttpServletRequest request) {
 
         String dataFromRequst = getDataFromRequst(request);
+        log.info("微信验证令牌请求：" + dataFromRequst);
 
         try {
             wxService.saveVerifyTicket(dataFromRequst);

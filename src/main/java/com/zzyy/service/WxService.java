@@ -9,4 +9,8 @@ import javax.servlet.http.HttpServletRequest;
  */
 public interface WxService {
     void saveVerifyTicket(HttpServletRequest request) throws Exception;
+
+    String getPreCode();
+
+    void callback(HttpServletRequest request);
 }

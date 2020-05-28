@@ -23,5 +23,7 @@
         <input type="submit" value="upload"/>
     </form>
 
+
+    <a href="/wx/getPreCode">授权</a>
 </body>
 </html>

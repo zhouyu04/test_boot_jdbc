@@ -3,19 +3,38 @@
 <mapper namespace="com.zzyy.mapper.WxMapper">
 
 
-  <insert id="saveVerifyTicket" parameterType="com.zzyy.entity.WxVerifyTicket">
-      insert into t_wx_ticket(fappid,finfoType,fverifyTicket,fcreatetime,fmodifytime)values (
-      #{appId},#{infoType},#{ticket},now(),now())
+    <insert id="saveVerifyTicket" parameterType="com.zzyy.entity.WxVerifyTicket">
+      insert into t_wx_ticket(fappid,finfoType,fverifyTicket,fauthorizerappid,fauthorizationcode,fpreauthcode,fcreatetime,fmodifytime)values (
+      #{appId},#{infoType},#{ticket},#{authorizerAppid},#{authorizationCode},#{preAuthCode},now(),now())
     </insert>
 
-  <select id="findByKey" resultType="com.zzyy.entity.WxVerifyTicket">
+    <select id="findByKey" resultType="com.zzyy.entity.WxVerifyTicket">
         select fappid as "appId",finfotype as "infoType",fverifyticket as "ticket"
         from t_wx_ticket where fappid =#{appId} and finfotype = #{infoType}
     </select>
 
-  <update id="updateVerifyTicket" parameterType="com.zzyy.entity.WxVerifyTicket">
-        update t_wx_ticket set fverifyticket = #{ticket} ,fmodifytime = now() where
+    <update id="updateVerifyTicket" parameterType="com.zzyy.entity.WxVerifyTicket">
+        update t_wx_ticket set fmodifytime = now()
+        <if test="ticket != null">
+            ,fverifyticket = #{ticket}
+        </if>
+        <if test="authorizerAppid != null">
+            ,fauthorizerappid = #{authorizerAppid}
+        </if>
+        <if test="authorizationCode != null">
+            ,fauthorizationcode = #{authorizationCode}
+        </if>
+        <if test="preAuthCode != null">
+            ,fpreauthcode = #{preAuthCode}
+        </if>
+        where
         fappid= #{appId} and finfotype = #{infoType}
     </update>
+
+    <select id="findByParams" resultType="com.zzyy.entity.WxVerifyTicket">
+        select fappid as "appId",finfotype as "infoType",fverifyticket as "ticket",
+        fauthorizerappid as "authorizerAppid",fauthorizationcode as "authorizationCode",fpreauthcode as "preAuthCode"
+        from t_wx_ticket where fappid =#{appId} and finfotype = #{infoType} and fauthorizationcode = #{authCode}
+    </select>
 
 </mapper>

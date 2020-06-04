@@ -13,4 +13,6 @@ public interface WxService {
     String getPreCode();
 
     void callback(HttpServletRequest request);
+
+    String getTicket();
 }

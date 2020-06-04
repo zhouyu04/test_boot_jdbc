@@ -9,6 +9,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * @Auther: zhouyu
@@ -31,14 +33,14 @@ public class WxTokenUtils {
         params.put("component_appsecret", APPSECRET);
         params.put("component_verify_ticket", ticket);
 
-        String token = sendPost(url, params.toJSONString());
+        String token = sendPost(url, params.toJSONString(), null);
         log.info("获取令牌返回：" + token);
         return token;
 
     }
 
 
-    public static String sendPost(String url, String params) {
+    public static String sendPost(String url, String params, Map<String, String> header) {
         PrintWriter out = null;
         BufferedReader in = null;
         String result = "";
@@ -53,6 +55,15 @@ public class WxTokenUtils {
             conn.setRequestProperty("connection", "Keep-Alive");
 //            conn.setRequestProperty("user-agent",
 //                    "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
+
+            if (header != null) {
+                Iterator<String> iterator = header.keySet().iterator();
+                while (iterator.hasNext()) {
+                    String next = iterator.next();
+                    conn.setRequestProperty(next, header.get(next));
+                }
+            }
+
             conn.setReadTimeout(15000);
             // 发送POST请求必须设置如下两行
             conn.setDoOutput(true);

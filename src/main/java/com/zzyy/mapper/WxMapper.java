@@ -4,6 +4,8 @@ import com.zzyy.entity.WxVerifyTicket;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Map;
+
 /**
  * @Auther: zhouyu
  * @Date: 2020/5/26 19:33
@@ -17,4 +19,6 @@ public interface WxMapper {
     WxVerifyTicket findByKey(@Param("appId") String appId, @Param("infoType") String infoType);
 
     void updateVerifyTicket(WxVerifyTicket exist);
+
+    WxVerifyTicket findByParams(Map<String, Object> params);
 }

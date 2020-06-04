@@ -42,23 +42,42 @@ public class WxController {
     public String callback(HttpServletRequest request) {
 
         wxService.callback(request);
-        return "";
+        return "index";
     }
 
 
     @RequestMapping("/getPreCode")
-    public String getPreCode() {
+    public String getPreCode(HttpServletRequest request) {
 
         String preCode = wxService.getPreCode();
+
+        String queryString = request.getQueryString();
+        log.info("queryString:" + queryString);
+
+
+        String appId = request.getParameter("appid");
+        String username = request.getParameter("username");
+        String dbid = request.getParameter("dbid");
+        String tenantid = request.getParameter("tenantid");
 
         String url = "https://mp.weixin.qq.com/cgi-bin/componentloginpage?component_appid="
                 + WxTokenUtils.APPID
                 + "&pre_auth_code=" + preCode
-                + "&redirect_uri=http://120.77.156.51/user/toLogin"
-                + "&auth_type=1";
+                + "&auth_type=1"
+                + "&redirect_uri=http://120.77.156.51/wx/callback?appId="
+                + appId + "_" + username + "_" + dbid + "_" + tenantid;
+        //appid_username_dbid_tenantid
 
         return "redirect:" + url;
 
+    }
+
+
+    @RequestMapping("/getTicket")
+    @ResponseBody
+    public String getTicket() {
+
+        return wxService.getTicket();
     }
 
 

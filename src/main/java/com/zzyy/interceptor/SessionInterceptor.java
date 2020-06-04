@@ -15,24 +15,24 @@ public class SessionInterceptor implements HandlerInterceptor {
     private static Logger log = LoggerFactory.getLogger(SessionInterceptor.class);
 
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        //添加登录免拦截
-        if (request.getRequestURI().equals("/user/login") || request.getRequestURI().equals("/user/toLogin")) {
-            return true;
-        }
-        //添加管理免拦截
-        if (request.getRequestURI().startsWith("/monitor")) {
-            return true;
-        }
-
-        if (request.getRequestURI().startsWith("/wx")) {
-            return true;
-        }
-
-        Object session_user = request.getSession().getAttribute("session_user");
-        if (session_user == null) {
-            response.sendRedirect("/user/toLogin");
-            return false;
-        }
+//        //添加登录免拦截
+//        if (request.getRequestURI().equals("/user/login") || request.getRequestURI().equals("/user/toLogin")) {
+//            return true;
+//        }
+//        //添加管理免拦截
+//        if (request.getRequestURI().startsWith("/monitor")) {
+//            return true;
+//        }
+//
+//        if (request.getRequestURI().startsWith("/wx")) {
+//            return true;
+//        }
+//
+//        Object session_user = request.getSession().getAttribute("session_user");
+//        if (session_user == null) {
+//            response.sendRedirect("/user/toLogin");
+//            return false;
+//        }
         return true;
     }
 

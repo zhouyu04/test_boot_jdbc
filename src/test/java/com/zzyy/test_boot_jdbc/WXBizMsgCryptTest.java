@@ -2,6 +2,7 @@ package com.zzyy.test_boot_jdbc;
 
 import com.zzyy.utils.wx.AesException;
 import com.zzyy.utils.wx.WXBizMsgCrypt;
+import com.zzyy.utils.wx.WxTokenUtils;
 import org.junit.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -75,6 +76,18 @@ public class WXBizMsgCryptTest {
         } catch (AesException e) {
             fail("正常流程，怎么就抛出异常了？？？？？？");
         }
+    }
+
+    @Test
+    public void testDesEncrypt() throws AesException {
+
+        String xml = "FtjbW9A26klJzlIdKSMyl3cYCpHCT6JDiVvtRWItYsjyD8MBQZZk1W4libiP0bySDpKALmKOKw7VXr+32ofQRt0p5wrGu7AFWVygp4GKLCeHO965TGosut8AXccFwnjXOaaVGd/XwLtqWZL+4rMESH/8eFLTFS64EF9ZrY5sK+ZJNuqoGYATvPXkRsUX6AHxEq9NkIWRJQVfnbW05rgY3viE2bbbNdjg9MgrosNBXuTFHxuVLytLtBd+BzhbqA7pj7Cy1W9bTqdEOMp57825FJbaU90BXjJTqfBbTcHg4aSTMyx3d6FQyYLAuoIciyBVWm4vT+TP8RzlvlA5oo9+0+5ZFXoVlSqQUIcZHNnmYXTRJHeKItdmZXACWfQzMW/GoI35h+J6lEoQpDP7EoJJzNR4d4NoEAw/PGmKRx+hg210olH2g7SK023v1Vj2MupyT71VEopTRasPiiqDlc8QuqIXu0N+5uai9iDKuT416MGFb9MhpgGAKpHpNdMmSOEh6DdnQ6x4hP42YQCdZCWcai/WcFX5Nk4bt9VtOZ36VL0B0ryZmyxDdPMFR1Y9rdXz3IGhi6GxKkMtuh37WOUdhPKjnX1n9CRan+eF6EHwC8GkuSOkd+Wtp/PBdpur+uPLkWF0KRq225EzXmCHiaNXqowgxAWSbZUu690LGABU2EaD/c70SiZVu7qrja94PPS7YscP1oH3XismESLN3qRBqMqzHu2Cld5jTHM3rLsoM28RtdH9rRk++kZSbngiO1UYT6laRndpLpKWCTbDo6RMdLqzsHPaNtX9MVYSy3xNAvM=";
+
+        WXBizMsgCrypt pc = new WXBizMsgCrypt("jdyretail$2018",
+                "91028f2ee1b4f65393b9d97831611b7a1234567890a", WxTokenUtils.APPID);
+
+        String decrypt = pc.decrypt(xml);
+        System.out.println(decrypt);
     }
 
     @Test

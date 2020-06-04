@@ -16,7 +16,7 @@ public class SessionConfiguration implements WebMvcConfigurer {
 
     public void addInterceptors(InterceptorRegistry registry) {
 
-        registry.addInterceptor(sessionInterceptor).addPathPatterns("/**");
+//        registry.addInterceptor(sessionInterceptor).addPathPatterns("/**");
 //        registry.addInterceptor(logHandlerInterceptor).addPathPatterns("/**");
     }
 }

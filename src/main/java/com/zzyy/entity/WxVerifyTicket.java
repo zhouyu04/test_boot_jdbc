@@ -18,6 +18,11 @@ public class WxVerifyTicket {
 
     private String ticket;
 
+    private String authorizerAppid;
+
+    private String authorizationCode;
+
+    private String preAuthCode;
 
     private Date createTime;
 

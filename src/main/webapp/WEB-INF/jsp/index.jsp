@@ -11,19 +11,22 @@
     <title>index</title>
 </head>
 <body>
-    大爷进来玩啊！！！
+<%--大爷进来玩啊！！！--%>
 
-    <br/>
+<br/>
 
-    <a href="/user/toChat">确认进入</a>
+<%--<a href="/user/toChat">确认进入</a>--%>
 
-    <form name="Form2" action="/user/upload" method="post"  enctype="multipart/form-data">
-        <h1>使用spring mvc提供的类的方法上传文件</h1>
-        <input type="file" name="file">
-        <input type="submit" value="upload"/>
-    </form>
+<%--<form name="Form2" action="/user/upload" method="post"  enctype="multipart/form-data">
+    <h1>使用spring mvc提供的类的方法上传文件</h1>
+    <input type="file" name="file">
+    <input type="submit" value="upload"/>
+</form>--%>
 
-
-    <a href="/wx/getPreCode">授权</a>
+appID:<input id="appid" value="${appId}" name=""><br>
+username:<input id="username" value="${username}" name=""><br>
+dbid:<input id="dbid" value="${dbid}" name=""><br>
+tenantid:<input id="tenantid" value="${tenantid}" name=""><br>
+<a href="/wx/getPreCode?appid=${appId}&username=${username}&dbid=${dbid}&tenantid=${tenantid}">授权</a>
 </body>
 </html>

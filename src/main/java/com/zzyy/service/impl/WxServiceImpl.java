@@ -7,6 +7,7 @@ import com.zzyy.mapper.WxMapper;
 import com.zzyy.utils.wx.WXBizMsgCrypt;
 import com.zzyy.utils.wx.WxTokenUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
@@ -19,6 +20,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -49,10 +52,6 @@ public class WxServiceImpl implements com.zzyy.service.WxService {
         StringBuffer requestURL = request.getRequestURL();
         String queryString = request.getQueryString();
 
-        String msg_signature = request.getParameter("msg_signature");
-        String timestamp = request.getParameter("timestamp");
-        String nonce = request.getParameter("nonce");
-
         log.info("请求URI：" + requestURI + "、URL:" + requestURL.toString() +
                 "、queryString:" + queryString);
         log.info("微信验证令牌请求：" + dataFromRequst);
@@ -77,24 +76,63 @@ public class WxServiceImpl implements com.zzyy.service.WxService {
         Element infoType = re.element("InfoType");
         String type = infoType.getStringValue();
 
-        Element componentVerifyTicket = re.element("ComponentVerifyTicket");
-        String verifyTicket = componentVerifyTicket.getStringValue();
+        if (StringUtils.equals("component_verify_ticket", type)) {
+            Element componentVerifyTicket = re.element("ComponentVerifyTicket");
+            String verifyTicket = componentVerifyTicket.getStringValue();
 
-        //查询是否已经存在
-        WxVerifyTicket exist = wxMapper.findByKey(appIdStringValue, type);
+            //查询是否已经存在
+            WxVerifyTicket exist = wxMapper.findByKey(appIdStringValue, type);
 
-        if (exist != null) {
-            exist.setTicket(verifyTicket);
-            wxMapper.updateVerifyTicket(exist);
-        } else {
-            WxVerifyTicket vt = new WxVerifyTicket();
+            if (exist != null) {
+                exist.setTicket(verifyTicket);
+                wxMapper.updateVerifyTicket(exist);
+            } else {
+                WxVerifyTicket vt = new WxVerifyTicket();
 
-            vt.setAppId(appIdStringValue);
-            vt.setInfoType(type);
-            vt.setTicket(verifyTicket);
+                vt.setAppId(appIdStringValue);
+                vt.setInfoType(type);
+                vt.setTicket(verifyTicket);
 
-            wxMapper.saveVerifyTicket(vt);
+                wxMapper.saveVerifyTicket(vt);
+            }
         }
+
+        if (StringUtils.equals("authorized", type)) {
+
+            Element authorizerAppid = re.element("AuthorizerAppid");
+            String appidStringValue = authorizerAppid.getStringValue();
+
+            Element authorizationCode = re.element("AuthorizationCode");
+            String codeStringValue = authorizationCode.getStringValue();
+
+            Element preAuthCode = re.element("PreAuthCode");
+            String preAuthCodeStringValue = preAuthCode.getStringValue();
+
+            //查询是否已经存在
+            WxVerifyTicket exist = wxMapper.findByKey(appIdStringValue, type);
+
+            if (exist != null) {
+
+                exist.setAuthorizerAppid(appidStringValue);
+                exist.setAuthorizationCode(codeStringValue);
+                exist.setPreAuthCode(preAuthCodeStringValue);
+                wxMapper.updateVerifyTicket(exist);
+            } else {
+                WxVerifyTicket vt = new WxVerifyTicket();
+
+                vt.setAppId(appIdStringValue);
+                vt.setInfoType(type);
+                vt.setAuthorizerAppid(appidStringValue);
+                vt.setAuthorizationCode(codeStringValue);
+                vt.setPreAuthCode(preAuthCodeStringValue);
+
+                wxMapper.saveVerifyTicket(vt);
+            }
+
+
+        }
+
+
     }
 
     /**
@@ -132,7 +170,7 @@ public class WxServiceImpl implements com.zzyy.service.WxService {
         JSONObject params = new JSONObject();
         params.put("component_appid", APPID);
 
-        String preCode = WxTokenUtils.sendPost(url, params.toJSONString());
+        String preCode = WxTokenUtils.sendPost(url, params.toJSONString(), null);
         log.info("获取预授权码返回：" + preCode);
         JSONObject object = JSONObject.parseObject(preCode);
         String pre_auth_code = object.getString("pre_auth_code");
@@ -146,23 +184,60 @@ public class WxServiceImpl implements com.zzyy.service.WxService {
         String dataFromRequst = getDataFromRequst(request);
         String queryString = request.getQueryString();
         log.info("回调参数：dataFromRequst：" + dataFromRequst + "、queryString" + queryString);
-        try {
-            Document document = DocumentHelper.parseText(dataFromRequst);
-            Element rootElement = document.getRootElement();
 
-            WXBizMsgCrypt wxBizMsgCrypt = new WXBizMsgCrypt(TOKEN, KEY, APPID);
+        //appid_username_dbid_tenantid
 
-            Element encrypt = rootElement.element("Encrypt");
-            String encryptStringValue = encrypt.getStringValue();
-            String decrypt = wxBizMsgCrypt.decrypt(encryptStringValue);
+        String auth_code = request.getParameter("auth_code");
+        String expires_in = request.getParameter("expires_in");
+        String appIdReq = request.getParameter("appId");
 
-            log.info("解析后：" + decrypt);
+        String[] s = StringUtils.split(appIdReq, "_");
 
-        } catch (Exception e) {
-            log.error("解析XML异常", e);
+        String appId = s[0];
+        String username = s[1];
+        String dbid = s[2];
+        String tenanId = s[3];
+
+
+        //获取到正经回调之后查询授权码和授权appid调用V7接口
+        //1、查询
+        Map<String, Object> params = new HashMap<>();
+        params.put("appId", appId);
+        params.put("infoType", "authorized");
+        params.put("authCode", auth_code);
+        WxVerifyTicket wxVerifyTicket = wxMapper.findByParams(params);
+        //2、todo 调用api将授权回调信息保存至V7
+        Map<String, String> header = new HashMap<>();
+
+        header.put("accountId", dbid);
+        header.put("tenantId", tenanId);
+        header.put("userName", username);
+
+        JSONObject obj = new JSONObject();
+
+        obj.put("appid", appId);
+        obj.put("infotype", "authorized");
+        obj.put("authorizerappid", wxVerifyTicket.getAuthorizerAppid());
+        obj.put("authorizationcode", auth_code);
+        obj.put("preauthcode", wxVerifyTicket.getPreAuthCode());
+
+        String url = "https://tf-feature1.jdy.com/ierp/innernal-api/app/mb/wx_auth";
+        String s1 = WxTokenUtils.sendPost(url, obj.toJSONString(), header);
+        log.info("调用V7api返回：" + s1);
+
+
+    }
+
+    @Override
+    public String getTicket() {
+
+        WxVerifyTicket component_verify_ticket = wxMapper.findByKey(APPID, "component_verify_ticket");
+
+        if (component_verify_ticket == null) {
+            return "not fount";
+        } else {
+            return component_verify_ticket.getTicket();
         }
-
-
     }
 
     public static String getDataFromRequst(HttpServletRequest request) {

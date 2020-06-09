@@ -15,4 +15,6 @@ public interface WxService {
     void callback(HttpServletRequest request);
 
     String getTicket();
+
+    String getAccess(String dbid);
 }

@@ -4,12 +4,15 @@
 
 
     <insert id="saveVerifyTicket" parameterType="com.zzyy.entity.WxVerifyTicket">
-      insert into t_wx_ticket(fappid,finfoType,fverifyTicket,fauthorizerappid,fauthorizationcode,fpreauthcode,fcreatetime,fmodifytime)values (
-      #{appId},#{infoType},#{ticket},#{authorizerAppid},#{authorizationCode},#{preAuthCode},now(),now())
+      insert into t_wx_ticket(fappid,finfoType,fverifyTicket,fauthorizerappid,fauthorizationcode,
+      fpreauthcode,faccesstoken,frefreshtoken,fcreatetime,fmodifytime)values (
+      #{appId},#{infoType},#{ticket},#{authorizerAppid},#{authorizationCode},#{preAuthCode},
+      #{accessToken},#{refreshToken},now(),now())
     </insert>
 
     <select id="findByKey" resultType="com.zzyy.entity.WxVerifyTicket">
-        select fappid as "appId",finfotype as "infoType",fverifyticket as "ticket"
+        select fappid as "appId",finfotype as "infoType",fverifyticket as "ticket",
+        faccesstoken as "accessToken",frefreshtoken as "refreshToken"
         from t_wx_ticket where fappid =#{appId} and finfotype = #{infoType}
     </select>
 
@@ -27,6 +30,12 @@
         <if test="preAuthCode != null">
             ,fpreauthcode = #{preAuthCode}
         </if>
+        <if test="accessToken != null">
+            ,faccesstoken = #{accessToken}
+        </if>
+        <if test="refreshToken != null">
+            ,frefreshtoken = #{refreshToken}
+        </if>
         where
         fappid= #{appId} and finfotype = #{infoType}
     </update>
@@ -35,6 +44,12 @@
         select fappid as "appId",finfotype as "infoType",fverifyticket as "ticket",
         fauthorizerappid as "authorizerAppid",fauthorizationcode as "authorizationCode",fpreauthcode as "preAuthCode"
         from t_wx_ticket where fappid =#{appId} and finfotype = #{infoType} and fauthorizationcode = #{authCode}
+    </select>
+
+    <select id="findAccessToken" resultType="com.zzyy.entity.WxVerifyTicket">
+        select fappid as "appId",finfotype as "infoType",fverifyticket as "ticket",
+        faccesstoken as "accessToken",frefreshtoken as "refreshToken",fauthorizerappid as "authorizerAppid"
+        from t_wx_ticket where fappid =#{appId} and finfotype = "authorization_info" and fauthorizerappid = #{authAppId}
     </select>
 
 </mapper>

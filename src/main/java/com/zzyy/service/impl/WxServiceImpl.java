@@ -20,8 +20,10 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -198,34 +200,139 @@ public class WxServiceImpl implements com.zzyy.service.WxService {
         String dbid = s[2];
         String tenanId = s[3];
 
+        //立即调用获取授权信息接口-获取authorizer_access_token和authorizer_refresh_token
+        String token = getComponentToken(WxTokenUtils.APPID);
+
+
+        String url = "https://api.weixin.qq.com/cgi-bin/component/api_query_auth?component_access_token=" + token;
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("component_appid", WxTokenUtils.APPID);
+        jsonObject.put("authorization_code", auth_code);
+
+        String res = WxTokenUtils.sendPost(url, jsonObject.toJSONString(), new HashMap<>());
+        log.info("使用授权码获取授权信息返回，res:" + res);
+        if (StringUtils.isBlank(res)) {
+            throw new CustomException("502", "获取授权信息失败");
+        }
+
+        JSONObject object = JSONObject.parseObject(res);
+        if (!object.containsKey("authorization_info")) {
+            throw new CustomException("502", "获取授权信息错误");
+        }
+
+        JSONObject authorization_info = object.getJSONObject("authorization_info");
+        WxVerifyTicket wt = new WxVerifyTicket();
+        wt.setAppId(WxTokenUtils.APPID);
+        wt.setInfoType("authorization_info");
+        wt.setAuthorizerAppid(authorization_info.getString("authorizer_appid"));
+        wt.setAccessToken(authorization_info.getString("authorizer_access_token"));
+        wt.setRefreshToken(authorization_info.getString("authorizer_refresh_token"));
+
+        wxMapper.saveVerifyTicket(wt);
+        //这里需要开启一个定时任务定时刷新accesstoken和erfreshtoken
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+
+                log.info("定时任务刷新令牌......");
+                WxVerifyTicket auth_info = wxMapper.findAccessToken(WxTokenUtils.APPID,
+                        authorization_info.getString("authorizer_appid"));
+
+                if (auth_info != null) {
+
+                    String componentToken = getComponentToken(WxTokenUtils.APPID);
+                    String reUrl = "https://api.weixin.qq.com/cgi-bin/component/api_authorizer_token?component_access_token=" + componentToken;
+                    JSONObject param = new JSONObject();
+                    param.put("component_appid", WxTokenUtils.APPID);
+                    param.put("authorizer_appid", auth_info.getAuthorizerAppid());
+                    param.put("authorizer_refresh_token", auth_info.getRefreshToken());
+
+                    String s1 = WxTokenUtils.sendPost(reUrl, param.toJSONString(), new HashMap<>());
+                    log.info("获取/刷新接口调用令牌返回，res:" + s1);
+                    if (StringUtils.isNotBlank(s1)) {
+                        JSONObject res = JSONObject.parseObject(s1);
+                        if (res.containsKey("authorizer_access_token")) {
+
+                            auth_info.setAccessToken(res.getString("authorizer_access_token"));
+                            auth_info.setRefreshToken(res.getString("authorizer_refresh_token"));
+
+                            wxMapper.updateVerifyTicket(auth_info);
+                        }
+                    }
+                }
+
+            }
+        }, new Date(),7000000);//单位为毫秒
+
 
         //获取到正经回调之后查询授权码和授权appid调用V7接口
         //1、查询
-        Map<String, Object> params = new HashMap<>();
-        params.put("appId", appId);
-        params.put("infoType", "authorized");
-        params.put("authCode", auth_code);
-        WxVerifyTicket wxVerifyTicket = wxMapper.findByParams(params);
-        //2、todo 调用api将授权回调信息保存至V7
-        Map<String, String> header = new HashMap<>();
+//        Map<String, Object> params = new HashMap<>();
+//        params.put("appId", appId);
+//        params.put("infoType", "authorized");
+//        params.put("authCode", auth_code);
+//        WxVerifyTicket wxVerifyTicket = wxMapper.findByParams(params);
+//        //2、todo 调用api将授权回调信息保存至V7
+//        Map<String, String> header = new HashMap<>();
+//
+//        header.put("accountId", dbid);
+//        header.put("tenantId", tenanId);
+//        header.put("userName", username);
+//
+//        JSONObject obj = new JSONObject();
+//
+//        obj.put("appid", appId);
+//        obj.put("infotype", "authorized");
+//        obj.put("authorizerappid", wxVerifyTicket.getAuthorizerAppid());
+//        obj.put("authorizationcode", auth_code);
+//        obj.put("preauthcode", wxVerifyTicket.getPreAuthCode());
+//
+//        url = "https://tf-feature1.jdy.com/ierp/innernal-api/app/mb/wx_auth";
+//        String s1 = WxTokenUtils.sendPost(url, obj.toJSONString(), header);
+//        log.info("调用V7api返回：" + s1);
 
-        header.put("accountId", dbid);
-        header.put("tenantId", tenanId);
-        header.put("userName", username);
 
-        JSONObject obj = new JSONObject();
+    }
 
-        obj.put("appid", appId);
-        obj.put("infotype", "authorized");
-        obj.put("authorizerappid", wxVerifyTicket.getAuthorizerAppid());
-        obj.put("authorizationcode", auth_code);
-        obj.put("preauthcode", wxVerifyTicket.getPreAuthCode());
+    private String getComponentToken(String appId) {
 
-        String url = "https://tf-feature1.jdy.com/ierp/innernal-api/app/mb/wx_auth";
-        String s1 = WxTokenUtils.sendPost(url, obj.toJSONString(), header);
-        log.info("调用V7api返回：" + s1);
+        String token = "";
+        WxVerifyTicket component_verify_ticket = wxMapper.findByKey(appId, "component_verify_ticket");
+        if (component_verify_ticket != null) {
+            String ticket = component_verify_ticket.getTicket();
+
+            String url = "https://api.weixin.qq.com/cgi-bin/component/api_component_token";
+
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("component_appid", appId);
+            jsonObject.put("component_appsecret", WxTokenUtils.APPSECRET);
+            jsonObject.put("component_verify_ticket", ticket);
+
+            String res = WxTokenUtils.sendPost(url, jsonObject.toJSONString(), new HashMap<>());
+
+            log.info("获取开放平台令牌返回，res:" + res);
+            if (StringUtils.isBlank(res)) {
+                throw new CustomException("500", "获取开放平台令牌失败");
+            }
+
+            JSONObject object = JSONObject.parseObject(res);
+
+            if (object.containsKey("component_access_token")) {
+                token = object.getString("component_access_token");
+            } else {
+                throw new CustomException("501", "获取开放平台令牌错误");
+            }
 
 
+        }
+
+        if (StringUtils.isBlank(token)) {
+            throw new CustomException("501", "获取开放平台令牌为空");
+        }
+
+        return token;
     }
 
     @Override
@@ -237,6 +344,17 @@ public class WxServiceImpl implements com.zzyy.service.WxService {
             return "not fount";
         } else {
             return component_verify_ticket.getTicket();
+        }
+    }
+
+    @Override
+    public String getAccess(String dbid) {
+
+        WxVerifyTicket authorization_info = wxMapper.findByKey(WxTokenUtils.APPID, "authorization_info");
+        if (authorization_info != null){
+            return authorization_info.getAccessToken();
+        }else {
+            return "";
         }
     }
 

@@ -81,6 +81,14 @@ public class WxController {
     }
 
 
+    @RequestMapping("/access")
+    @ResponseBody
+    public String getAccess(HttpServletRequest request){
+
+        String dbid = request.getParameter("dbid");
+        return wxService.getAccess(dbid);
+    }
+
 }
 
 

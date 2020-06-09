@@ -24,6 +24,10 @@ public class WxVerifyTicket {
 
     private String preAuthCode;
 
+    private String accessToken;
+
+    private String refreshToken;
+
     private Date createTime;
 
     private Date modifyTime;

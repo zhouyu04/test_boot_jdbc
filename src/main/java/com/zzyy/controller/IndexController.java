@@ -1,9 +1,9 @@
 package com.zzyy.controller;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,15 +34,19 @@ public class IndexController {
 
         String queryString = request.getQueryString();
         logger.info("queryString:" + queryString);
-        String appId = request.getParameter("appId");
-        String username = request.getParameter("username");
-        String dbid = request.getParameter("dbid");
-        String tenantid = request.getParameter("tenantid");
+        String appId = StringUtils.isBlank(request.getParameter("appId"))
+                ? "wxb6051228351f2072" : request.getParameter("appId");
+        String username = StringUtils.isBlank(request.getParameter("username"))
+                ? "administrator" : request.getParameter("username");
+        String dbid = StringUtils.isBlank(request.getParameter("dbid"))
+                ? "19002" : request.getParameter("dbid");
+        String tenantid = StringUtils.isBlank(request.getParameter("tenantid"))
+                ? "jdy" : request.getParameter("tenantid");
 
-        request.setAttribute("appId",appId);
-        request.setAttribute("username",username);
-        request.setAttribute("dbid",dbid);
-        request.setAttribute("tenantid",tenantid);
+        request.setAttribute("appId", appId);
+        request.setAttribute("username", username);
+        request.setAttribute("dbid", dbid);
+        request.setAttribute("tenantid", tenantid);
 
 
         logger.info("index");

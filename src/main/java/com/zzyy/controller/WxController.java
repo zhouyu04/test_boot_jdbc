@@ -124,6 +124,20 @@ public class WxController {
         return wxService.getcomptoken();
     }
 
+    /**
+     * 功能描述: 检测是否已经授权，已授权返回授权信息
+     *
+     * @auther: zhouyu
+     * @date: 2020/6/16 16:21
+     */
+    @RequestMapping("/checkAuthorize")
+    @ResponseBody
+    public JSONObject checkAuthorize(HttpServletRequest request) {
+
+        String dbid = request.getParameter("dbid");
+        return wxService.checkAuthorize(dbid);
+    }
+
 }
 
 

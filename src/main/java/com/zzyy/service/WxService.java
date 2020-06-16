@@ -21,4 +21,6 @@ public interface WxService {
     String getAccess(String dbid);
 
     JSONObject getcomptoken();
+
+    JSONObject checkAuthorize(String dbid);
 }

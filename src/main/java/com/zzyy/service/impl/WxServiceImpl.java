@@ -411,6 +411,50 @@ public class WxServiceImpl implements com.zzyy.service.WxService {
         return res;
     }
 
+    @Override
+    public JSONObject checkAuthorize(String dbid) {
+
+        JSONObject res = new JSONObject();
+        res.put("isAuth", false);
+        //查询授权信息
+        Map<String, Object> params = new HashMap<>();
+        params.put("dbid", dbid);
+        params.put("infoType", "authorization_info");
+        params.put("appId", WxTokenUtils.APPID);
+        WxVerifyTicket byParams = wxMapper.findByParams(params);
+
+        if (byParams != null) {
+
+            //获取开放平台token
+            JSONObject getcomptoken = getcomptoken();
+            String component_access_token = getcomptoken.getString("component_access_token");
+            String appId = byParams.getAppId();
+            String authorizerAppid = byParams.getAuthorizerAppid();
+
+            String url = "https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_info?component_access_token=" + component_access_token;
+
+            JSONObject pam = new JSONObject();
+            pam.put("component_appid", appId);
+            pam.put("authorizer_appid", authorizerAppid);
+
+            String s = WxTokenUtils.sendPost(url, pam.toJSONString(), new HashMap<>());
+            log.info("查询授权信息返回:" + s);
+
+            if (StringUtils.isBlank(s)) {
+                throw new CustomException("500", "查询授权信息异常，返回为空");
+            }
+            res = JSONObject.parseObject(s);
+
+            if (res.containsKey("errcode")) {
+                throw new CustomException("500", "查询授权信息异常，返回错误" + s);
+            }
+
+            res.put("isAuth", true);
+        }
+
+        return res;
+    }
+
     public static String getDataFromRequst(HttpServletRequest request) {
         try {
             InputStream is = request.getInputStream();

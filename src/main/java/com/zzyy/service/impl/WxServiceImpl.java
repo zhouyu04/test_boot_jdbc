@@ -20,10 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -191,14 +188,19 @@ public class WxServiceImpl implements com.zzyy.service.WxService {
 
         String auth_code = request.getParameter("auth_code");
         String expires_in = request.getParameter("expires_in");
-        String appIdReq = request.getParameter("appId");
+        String params = request.getParameter("params");
+        String dbid = (String) request.getAttribute("dbid");
+        dbid = StringUtils.trim(dbid);
 
-        String[] s = StringUtils.split(appIdReq, "_");
+        JSONObject info = new JSONObject();
+        if (StringUtils.isNotBlank(params)) {
+            info = JSONObject.parseObject(params);
+        }
 
-        String appId = s[0];
-        String username = s[1];
-        String dbid = s[2];
-        String tenanId = s[3];
+        String appId = info.containsKey("appId") ? info.getString("appId") : "";
+        String username = info.containsKey("username") ? info.getString("username") : "";
+//        String dbid = info.containsKey("dbid") ? info.getString("dbid") : "";
+        String tenanId = info.containsKey("tenantid") ? info.getString("tenantid") : "";
 
         //立即调用获取授权信息接口-获取authorizer_access_token和authorizer_refresh_token
         String token = getComponentToken(WxTokenUtils.APPID);
@@ -223,6 +225,7 @@ public class WxServiceImpl implements com.zzyy.service.WxService {
 
         JSONObject authorization_info = object.getJSONObject("authorization_info");
         WxVerifyTicket wt = new WxVerifyTicket();
+        wt.setDbid(dbid);
         wt.setAppId(WxTokenUtils.APPID);
         wt.setInfoType("authorization_info");
         wt.setAuthorizerAppid(authorization_info.getString("authorizer_appid"));
@@ -264,7 +267,7 @@ public class WxServiceImpl implements com.zzyy.service.WxService {
                 }
 
             }
-        }, new Date(),7000000);//单位为毫秒
+        }, new Date(), 7000000);//单位为毫秒
 
 
         //获取到正经回调之后查询授权码和授权appid调用V7接口
@@ -350,12 +353,62 @@ public class WxServiceImpl implements com.zzyy.service.WxService {
     @Override
     public String getAccess(String dbid) {
 
-        WxVerifyTicket authorization_info = wxMapper.findByKey(WxTokenUtils.APPID, "authorization_info");
-        if (authorization_info != null){
+        Map<String, Object> params = new HashMap<>();
+        params.put("appId", WxTokenUtils.APPID);
+        params.put("infoType", "authorization_info");
+        params.put("dbid", dbid);
+
+        WxVerifyTicket authorization_info = wxMapper.findByParams(params);
+        if (authorization_info != null) {
             return authorization_info.getAccessToken();
-        }else {
+        } else {
             return "";
         }
+    }
+
+    @Override
+    public JSONObject getcomptoken() {
+
+        JSONObject res = new JSONObject();
+
+        //获取令牌
+        Object o = redisTemplate.opsForValue().get("accessToken");
+
+        if (o != null) {
+            res.put("component_access_token", o);
+            return res;
+        }
+
+        //查询ticket
+        WxVerifyTicket component_verify_ticket = wxMapper.findByKey(WxTokenUtils.APPID, "component_verify_ticket");
+        if (component_verify_ticket != null) {
+            String ticket = component_verify_ticket.getTicket();
+            String url = "https://api.weixin.qq.com/cgi-bin/component/api_component_token";
+
+            JSONObject param = new JSONObject();
+            param.put("component_appid", WxTokenUtils.APPID);
+            param.put("component_appsecret", WxTokenUtils.APPSECRET);
+            param.put("component_verify_ticket", ticket);
+
+            String s = WxTokenUtils.sendPost(url, param.toJSONString(), new HashMap<>());
+
+            log.info("查询开放平台token返回：" + s);
+
+            if (StringUtils.isBlank(s)) {
+                throw new CustomException("500", "查询开放平台token失败，返回为空");
+            }
+
+            res = JSONObject.parseObject(s);
+        }
+        if (res.containsKey("errcode")) {
+            throw new CustomException("500", "查询开放平台返回失败" + res.toJSONString());
+        }
+        String component_access_token = res.containsKey("component_access_token") ?
+                res.getString("component_access_token") : "";
+
+        redisTemplate.opsForValue().set("accessToken", component_access_token, 100, TimeUnit.MINUTES);
+
+        return res;
     }
 
     public static String getDataFromRequst(HttpServletRequest request) {

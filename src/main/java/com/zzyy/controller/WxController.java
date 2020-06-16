@@ -1,9 +1,11 @@
 package com.zzyy.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.zzyy.service.WxService;
 import com.zzyy.utils.wx.WxTokenUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -38,8 +40,16 @@ public class WxController {
     }
 
 
-    @RequestMapping("/callback")
-    public String callback(HttpServletRequest request) {
+    @RequestMapping("/callback/{appId}/{username}/{dbid}/{tenantid}")
+    public String callback(HttpServletRequest request,
+                           @PathVariable String appId,
+                           @PathVariable String username,
+                           @PathVariable String dbid,
+                           @PathVariable String tenantid) {
+        request.setAttribute("appId", appId);
+        request.setAttribute("username", username);
+        request.setAttribute("dbid", dbid);
+        request.setAttribute("tenantid", tenantid);
 
         wxService.callback(request);
         return "index";
@@ -60,12 +70,18 @@ public class WxController {
         String dbid = request.getParameter("dbid");
         String tenantid = request.getParameter("tenantid");
 
+        JSONObject params = new JSONObject();
+        params.put("appId", appId);
+        params.put("username", username);
+        params.put("dbid", dbid);
+        params.put("tenantid", tenantid);
+
         String url = "https://mp.weixin.qq.com/cgi-bin/componentloginpage?component_appid="
                 + WxTokenUtils.APPID
                 + "&pre_auth_code=" + preCode
                 + "&auth_type=1"
-                + "&redirect_uri=http://120.77.156.51/wx/callback?appId="
-                + appId + "_" + username + "_" + dbid + "_" + tenantid;
+                + "&redirect_uri=http://120.77.156.51/wx/callback/"
+                + appId + "/" + username + "/" + dbid + "/" + tenantid;
         //appid_username_dbid_tenantid
 
         return "redirect:" + url;
@@ -81,12 +97,31 @@ public class WxController {
     }
 
 
+    /**
+     * 功能描述: 收取授权公众号token
+     *
+     * @auther: zhouyu
+     * @date: 2020/6/16 15:42
+     */
     @RequestMapping("/access")
     @ResponseBody
-    public String getAccess(HttpServletRequest request){
+    public String getAccess(HttpServletRequest request) {
 
         String dbid = request.getParameter("dbid");
         return wxService.getAccess(dbid);
+    }
+
+    /**
+     * 功能描述: 获取开放平台token
+     *
+     * @auther: zhouyu
+     * @date: 2020/6/16 15:42
+     */
+    @RequestMapping("/getcomptoken")
+    @ResponseBody
+    public JSONObject getcomptoken() {
+
+        return wxService.getcomptoken();
     }
 
 }

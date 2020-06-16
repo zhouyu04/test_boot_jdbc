@@ -4,9 +4,9 @@
 
 
     <insert id="saveVerifyTicket" parameterType="com.zzyy.entity.WxVerifyTicket">
-      insert into t_wx_ticket(fappid,finfoType,fverifyTicket,fauthorizerappid,fauthorizationcode,
+      insert into t_wx_ticket(fdbid,fappid,finfoType,fverifyTicket,fauthorizerappid,fauthorizationcode,
       fpreauthcode,faccesstoken,frefreshtoken,fcreatetime,fmodifytime)values (
-      #{appId},#{infoType},#{ticket},#{authorizerAppid},#{authorizationCode},#{preAuthCode},
+      #{dbid},#{appId},#{infoType},#{ticket},#{authorizerAppid},#{authorizationCode},#{preAuthCode},
       #{accessToken},#{refreshToken},now(),now())
     </insert>
 
@@ -42,8 +42,16 @@
 
     <select id="findByParams" resultType="com.zzyy.entity.WxVerifyTicket">
         select fappid as "appId",finfotype as "infoType",fverifyticket as "ticket",
-        fauthorizerappid as "authorizerAppid",fauthorizationcode as "authorizationCode",fpreauthcode as "preAuthCode"
-        from t_wx_ticket where fappid =#{appId} and finfotype = #{infoType} and fauthorizationcode = #{authCode}
+        fauthorizerappid as "authorizerAppid",fauthorizationcode as "authorizationCode",fpreauthcode as "preAuthCode",
+        faccesstoken as "accessToken",frefreshtoken as "refreshToken"
+        from t_wx_ticket where fappid =#{appId} and finfotype = #{infoType}
+        <if test="authCode != null">
+            and fauthorizationcode = #{authCode}
+        </if>
+        <if test="dbid != null">
+            and fdbid = #{dbid}
+        </if>
+
     </select>
 
     <select id="findAccessToken" resultType="com.zzyy.entity.WxVerifyTicket">

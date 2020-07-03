@@ -3,6 +3,7 @@ package com.zzyy.service;
 import com.alibaba.fastjson.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 
 /**
  * @Auther: zhouyu
@@ -23,4 +24,10 @@ public interface WxService {
     JSONObject getcomptoken();
 
     JSONObject checkAuthorize(String dbid);
+
+    JSONObject recall(String dbid);
+
+    void notify(String appId, HttpServletRequest request);
+
+    JSONObject wechatRoute(String dbid, HttpServletRequest request) throws Exception;
 }

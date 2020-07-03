@@ -25,6 +25,16 @@ public class WxController {
     @Resource
     WxService wxService;
 
+
+    @RequestMapping("/notify/{appId}")
+    @ResponseBody
+    public String notify(@PathVariable String appId, HttpServletRequest request) {
+
+        wxService.notify(appId,request);
+
+        return "";
+    }
+
     @RequestMapping("/info")
     @ResponseBody
     public String info(HttpServletRequest request) {
@@ -136,6 +146,16 @@ public class WxController {
 
         String dbid = request.getParameter("dbid");
         return wxService.checkAuthorize(dbid);
+    }
+
+    //解除绑定
+    @RequestMapping("/recall")
+    @ResponseBody
+    public JSONObject recall(HttpServletRequest request) {
+
+        String dbid = request.getParameter("dbid");
+        return wxService.recall(dbid);
+
     }
 
 }

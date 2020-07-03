@@ -14,6 +14,10 @@ public class WxVerifyTicket {
 
     private String dbid;
 
+    private String username;
+
+    private String tenantId;
+
     private String appId;
 
     private String infoType;

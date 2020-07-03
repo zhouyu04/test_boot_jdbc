@@ -11,7 +11,6 @@ import com.zzyy.proxy.static_proxy.StaticService;
 import com.zzyy.proxy.static_proxy.StaticServiceImpl;
 import com.zzyy.proxy.static_proxy.StaticServiceProxy;
 import com.zzyy.utils.Singleton;
-import io.micrometer.core.instrument.util.MathUtils;
 import org.junit.Test;
 
 import java.util.Random;
@@ -24,7 +23,7 @@ import java.util.Random;
 public class TestProxy {
 
     @Test
-    public void testRandom(){
+    public void testRandom() {
 
         Random random = new Random();
         int i = random.nextInt(5);
@@ -33,7 +32,7 @@ public class TestProxy {
     }
 
     @Test
-    public void TestBuilder2(){
+    public void TestBuilder2() {
 
         PersionCreate persionCreate = new PersionType("云之迢迢");
         GamePlayer gamePlayer = new GamePlayer(persionCreate);

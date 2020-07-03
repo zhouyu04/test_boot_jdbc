@@ -1,8 +1,11 @@
 package com.zzyy.test_boot_jdbc;
 
+import com.alibaba.fastjson.JSONObject;
 import com.zzyy.utils.wx.AesException;
 import com.zzyy.utils.wx.WXBizMsgCrypt;
 import com.zzyy.utils.wx.WxTokenUtils;
+import com.zzyy.utils.wx.XMLParse;
+import org.dom4j.DocumentHelper;
 import org.junit.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -15,6 +18,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -79,15 +83,33 @@ public class WXBizMsgCryptTest {
     }
 
     @Test
-    public void testDesEncrypt() throws AesException {
+    public void testDesEncrypt() throws Exception {
 
-        String xml = "FtjbW9A26klJzlIdKSMyl3cYCpHCT6JDiVvtRWItYsjyD8MBQZZk1W4libiP0bySDpKALmKOKw7VXr+32ofQRt0p5wrGu7AFWVygp4GKLCeHO965TGosut8AXccFwnjXOaaVGd/XwLtqWZL+4rMESH/8eFLTFS64EF9ZrY5sK+ZJNuqoGYATvPXkRsUX6AHxEq9NkIWRJQVfnbW05rgY3viE2bbbNdjg9MgrosNBXuTFHxuVLytLtBd+BzhbqA7pj7Cy1W9bTqdEOMp57825FJbaU90BXjJTqfBbTcHg4aSTMyx3d6FQyYLAuoIciyBVWm4vT+TP8RzlvlA5oo9+0+5ZFXoVlSqQUIcZHNnmYXTRJHeKItdmZXACWfQzMW/GoI35h+J6lEoQpDP7EoJJzNR4d4NoEAw/PGmKRx+hg210olH2g7SK023v1Vj2MupyT71VEopTRasPiiqDlc8QuqIXu0N+5uai9iDKuT416MGFb9MhpgGAKpHpNdMmSOEh6DdnQ6x4hP42YQCdZCWcai/WcFX5Nk4bt9VtOZ36VL0B0ryZmyxDdPMFR1Y9rdXz3IGhi6GxKkMtuh37WOUdhPKjnX1n9CRan+eF6EHwC8GkuSOkd+Wtp/PBdpur+uPLkWF0KRq225EzXmCHiaNXqowgxAWSbZUu690LGABU2EaD/c70SiZVu7qrja94PPS7YscP1oH3XismESLN3qRBqMqzHu2Cld5jTHM3rLsoM28RtdH9rRk++kZSbngiO1UYT6laRndpLpKWCTbDo6RMdLqzsHPaNtX9MVYSy3xNAvM=";
+        String xml = "PkTyAoq89lekNbzB+pGEgC0b+9nNdfcWsbns3/JQ8UVE9Ppw/5bpJZ+86kfVk6r0+w8c7aNYPxdiyyZI8TpkgjQFKJZRDZdadl8SJgUzaAW4JdWud8PHd9cz4qvtYkzkMdFHbfgcenFB7tOVNKu895Okt9wXoW8pEGLy0xIKDamVUwix/R4InRvSVWGhg2FlUTTzbtM+3bATft/7murFp92GVaXEiv1z7S37Nbbz7lKwnKqHOmCXct/zNrlmHT/DBznqV8WJn62NkG0Jkg1GR/0eikFDyclSgGtgpFrE9DggHz1A2Fhzb4zeJmxSgEcCNUlmImEhXqW/r2bZ1ohZ9ekOfu9EiEZqifNi/k7HsWaisMSc8sEg/BXYbGpk/XnwAvI2g1nE80IhhLVpqREv/i9fnSsxWKeajOpDQmlI2B/qaE2pGWZ04qWJQrhMZ4OaBXZpcLmBhJyRyz/R6RloWzOCd7x/ClNjABDtx2KQ2RB+NJsOvyxucuvoMY6/bsMVTgP5D0uN8UUhlFckY3FYOpVJEfwQe1eN6aeEui00FHU=";
 
         WXBizMsgCrypt pc = new WXBizMsgCrypt("jdyretail$2018",
                 "91028f2ee1b4f65393b9d97831611b7a1234567890a", WxTokenUtils.APPID);
 
         String decrypt = pc.decrypt(xml);
         System.out.println(decrypt);
+
+        org.dom4j.Document documentDecrypt = DocumentHelper.parseText(decrypt);
+        org.dom4j.Element re = documentDecrypt.getRootElement();
+
+        List<org.dom4j.Element> elements = re.elements();
+
+        JSONObject obj = new JSONObject();
+        for (int i =0 ;i<elements.size();i++){
+            org.dom4j.Element element = elements.get(i);
+            String elementName = element.getName();
+            String stringValue = element.getStringValue();
+            System.out.println(stringValue);
+
+            obj.put(elementName,stringValue);
+
+        }
+
+        System.out.println(obj.toJSONString());
     }
 
     @Test

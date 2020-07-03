@@ -41,6 +41,8 @@ public class WxTokenUtils {
 
 
     public static String sendPost(String url, String params, Map<String, String> header) {
+
+        log.info("请求地址：" + url + "请求参数：" + params + "请求头：" + header);
         PrintWriter out = null;
         BufferedReader in = null;
         String result = "";

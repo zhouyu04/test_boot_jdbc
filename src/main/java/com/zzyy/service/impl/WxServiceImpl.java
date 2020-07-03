@@ -4,11 +4,14 @@ import com.alibaba.fastjson.JSONObject;
 import com.zzyy.entity.WxVerifyTicket;
 import com.zzyy.exception.CustomException;
 import com.zzyy.mapper.WxMapper;
+import com.zzyy.utils.SHA1;
+import com.zzyy.utils.wx.MessageUtil;
 import com.zzyy.utils.wx.WXBizMsgCrypt;
 import com.zzyy.utils.wx.WxTokenUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
+import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -196,11 +199,10 @@ public class WxServiceImpl implements com.zzyy.service.WxService {
         if (StringUtils.isNotBlank(params)) {
             info = JSONObject.parseObject(params);
         }
+        log.info("参数info:" + info.toJSONString());
 
-        String appId = info.containsKey("appId") ? info.getString("appId") : "";
-        String username = info.containsKey("username") ? info.getString("username") : "";
-//        String dbid = info.containsKey("dbid") ? info.getString("dbid") : "";
-        String tenanId = info.containsKey("tenantid") ? info.getString("tenantid") : "";
+        String username = (String) request.getAttribute("username");
+        String tenantid = (String) request.getAttribute("tenantid");
 
         //立即调用获取授权信息接口-获取authorizer_access_token和authorizer_refresh_token
         String token = getComponentToken(WxTokenUtils.APPID);
@@ -226,6 +228,8 @@ public class WxServiceImpl implements com.zzyy.service.WxService {
         JSONObject authorization_info = object.getJSONObject("authorization_info");
         WxVerifyTicket wt = new WxVerifyTicket();
         wt.setDbid(dbid);
+        wt.setUsername(username);
+        wt.setTenantId(tenantid);
         wt.setAppId(WxTokenUtils.APPID);
         wt.setInfoType("authorization_info");
         wt.setAuthorizerAppid(authorization_info.getString("authorizer_appid"));
@@ -455,6 +459,183 @@ public class WxServiceImpl implements com.zzyy.service.WxService {
         return res;
     }
 
+    @Override
+    public JSONObject recall(String dbid) {
+
+        //查询授权信息
+        Map<String, Object> params = new HashMap<>();
+        params.put("dbid", dbid);
+        params.put("infoType", "authorization_info");
+        params.put("appId", WxTokenUtils.APPID);
+        WxVerifyTicket byParams = wxMapper.findByParams(params);
+
+        JSONObject getcomptoken = getcomptoken();
+        String url = "https://api.weixin.qq.com/cgi-bin/open/unbind?access_token=" + getcomptoken;
+
+        JSONObject param = new JSONObject();
+        param.put("appid", byParams.getAuthorizerAppid());
+        param.put("open_appid", byParams.getAppId());
+
+        String s = WxTokenUtils.sendPost(url, param.toJSONString(), new HashMap<>());
+        log.info("微信解绑返回：" + s);
+        if (StringUtils.isBlank(s)) {
+            throw new CustomException("500", "微信解绑异常，返回为空");
+        }
+        JSONObject object = JSONObject.parseObject(s);
+
+        int errcode = object.containsKey("errcode") ? object.getIntValue("errcode") : 500;
+        if (errcode != 0) {
+            throw new CustomException("500", "微信解绑失败" + s);
+        }
+
+        return object;
+    }
+
+    @Override
+    public void notify(String appId, HttpServletRequest request) {
+
+//        if ("GET".equals(request.getMethod()) && validateToken(appId, request)) {
+//            log.info("推送消息失败，请求验证不通过");
+//        }
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("appId", WxTokenUtils.APPID);
+        params.put("infoType", "authorization_info");
+        params.put("authorizerAppid", appId);
+        WxVerifyTicket byParams = wxMapper.findByParams(params);
+
+        String dbid = "";
+        String username = "";
+        String tenantId = "";
+        if (byParams != null) {
+            dbid = byParams.getDbid();
+            username = byParams.getUsername();
+            tenantId = byParams.getTenantId();
+        }
+
+
+        try {
+            JSONObject jsonObject = MessageUtil.parseXML(request);
+            log.info("微信推送消息：" + jsonObject.toJSONString());
+
+            if (jsonObject.containsKey("Encrypt")) {
+                String encrypt = jsonObject.getString("Encrypt");
+                WXBizMsgCrypt wxBizMsgCrypt = new WXBizMsgCrypt(TOKEN, KEY, APPID);
+                String decrypt = wxBizMsgCrypt.decrypt(encrypt);
+                log.info("解密后推送参数:" + decrypt);
+                jsonObject = xml2Json(decrypt);
+            }
+
+            //根据APPID获取到绑定的V7用户
+            Map<String, String> header = new HashMap<>();
+            header.put("userName", username);
+            header.put("tenantId", tenantId);
+            header.put("accountId", dbid);
+
+            String url = "https://tf-feature1.jdy.com/ierp/innernal-api/app/mb/wx_notify";
+
+
+            String s = WxTokenUtils.sendPost(url, jsonObject.toJSONString(), header);
+            log.info("推送V7返回：" + s);
+
+
+        } catch (Exception e) {
+            log.error("解析微信推送消息失败", e);
+        }
+
+    }
+
+    @Override
+    public JSONObject wechatRoute(String dbid, HttpServletRequest request) throws Exception {
+
+        //校验参数
+        JSONObject params = new JSONObject();
+        String requestPostStr = getRequestPostStr(request);
+        if (StringUtils.isNotBlank(requestPostStr)) {
+            params = JSONObject.parseObject(requestPostStr);
+        } else {
+            throw new CustomException("500", "参数解析异常，内容为空");
+        }
+
+        String url = params.containsKey("url") ? params.getString("url") : "";
+        String body = params.containsKey("body") ? params.getString("body") : "";
+
+        //根据dbid获取到头信息
+
+        Map<String, Object> pa = new HashMap<>();
+        pa.put("dbid", dbid);
+        pa.put("appId", WxTokenUtils.APPID);
+        pa.put("infoType", "authorization_info");
+        WxVerifyTicket byParams = wxMapper.findByParams(pa);
+
+        Map<String, String> header = new HashMap<>();
+        header.put("accountId", dbid);
+        header.put("tenantId", byParams.getTenantId());
+        header.put("userName", byParams.getUsername());
+
+        String res = WxTokenUtils.sendPost(url, body, header);
+        log.info("转发V7请求返回");
+        if (StringUtils.isNotBlank(res)) {
+            return JSONObject.parseObject(res);
+        } else {
+            return new JSONObject();
+        }
+    }
+
+    protected static String getRequestPostStr(HttpServletRequest request) throws IOException {
+        byte[] buffer = getRequestPostBytes(request);
+        if (buffer.length < 2)
+            return null;
+        String charEncoding = request.getCharacterEncoding();
+        if (charEncoding == null) {
+            charEncoding = "UTF-8";
+        }
+        return new String(buffer, charEncoding);
+    }
+
+    protected static byte[] getRequestPostBytes(HttpServletRequest request) throws IOException {
+        int contentLength = request.getContentLength();
+        if (contentLength < 0) {
+            return new byte[0];
+        }
+        byte[] buffer = new byte[contentLength];
+        for (int i = 0; i < contentLength; ) {
+            int readlen = request.getInputStream().read(buffer, i, contentLength - i);
+            if (readlen == -1) {
+                break;
+            }
+            i += readlen;
+        }
+        return buffer;
+    }
+
+
+    public Boolean validateToken(String appId, HttpServletRequest request) {
+
+        // 微信加密签名
+        String signature = request.getParameter("signature");
+        // 随机字符串
+        String echostr = request.getParameter("echostr");
+        // 时间戳
+        String timestamp = request.getParameter("timestamp");
+        // 随机数
+        String nonce = request.getParameter("nonce");
+
+        String[] str = {appId, timestamp, nonce};
+        Arrays.sort(str); // 字典序排序
+        String bigStr = str[0] + str[1] + str[2];
+        // SHA1加密
+        String digest = new SHA1().getDigestOfString(bigStr.getBytes()).toLowerCase();
+        log.info("token  digest=" + digest);
+        log.info("token  signature=" + signature);
+
+        // 确认请求来至微信
+        if (digest.equals(signature)) {
+            return true;
+        }
+        return false;
+    }
+
     public static String getDataFromRequst(HttpServletRequest request) {
         try {
             InputStream is = request.getInputStream();
@@ -475,4 +656,38 @@ public class WxServiceImpl implements com.zzyy.service.WxService {
         }
         return null;
     }
+
+
+    public JSONObject xml2Json(String xmlStr) {
+
+        JSONObject res = new JSONObject();
+        if (StringUtils.isBlank(xmlStr)) {
+            return res;
+        }
+
+        Document documentDecrypt = null;
+        try {
+            documentDecrypt = DocumentHelper.parseText(xmlStr);
+        } catch (DocumentException e) {
+            log.error("xml2Json解析xml异常：", e);
+        }
+        Element re = documentDecrypt.getRootElement();
+
+        List<Element> elements = re.elements();
+
+        for (int i = 0; i < elements.size(); i++) {
+            Element element = elements.get(i);
+            String elementName = element.getName();
+            String stringValue = element.getStringValue();
+            System.out.println(stringValue);
+
+            res.put(elementName, stringValue);
+
+        }
+
+        System.out.println(res.toJSONString());
+        return res;
+
+    }
+
 }

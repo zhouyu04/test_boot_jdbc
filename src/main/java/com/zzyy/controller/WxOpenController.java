@@ -92,7 +92,7 @@ public class WxOpenController {
 
         try {
             String url = String.format("/#/rechargeList?" +
-                            "card_id=%s&encrypt_code=%s&openidCard=%s&outer_str=%s&dbid=%s&loginName=%s&uid=%s",
+                            "card_id=%s&encrypt_code=%s&openidCard=%s&outer_str=%s&fdbid=%s&loginName=%s&uid=%s",
                     request.getParameter("card_id"), request.getParameter("encrypt_code"),
                     request.getParameter("openid"), request.getParameter("outer_str"), dbid, lname, uid);
             log.info("rechargeRecord url={}", url);

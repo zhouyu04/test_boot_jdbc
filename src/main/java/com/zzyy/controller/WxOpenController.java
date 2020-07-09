@@ -72,7 +72,7 @@ public class WxOpenController {
                 obj.put(name, jsonObject.getString("value"));
             }
             log.info("getUserInfo={}", obj);
-            response.sendRedirect(String.format("/index.html?card_id=%s&mobile=%s&openid=%s&sex=%s&birthday=%s&name=%s&fdbid=%s",
+            response.sendRedirect(String.format("/#/activate?card_id=%s&mobile=%s&openid=%s&sex=%s&birthday=%s&name=%s&fdbid=%s",
                     request.getParameter("card_id"),
                     obj.getString("mobile"),
                     request.getParameter("openid"),
@@ -87,6 +87,23 @@ public class WxOpenController {
     }
 
 
+    @RequestMapping(value = "/weChat/recharge/{lname}/{uid}", produces = "text/html;charset=UTF-8")
+    public void recharge(@PathVariable String lname, @PathVariable long uid, @RequestParam("dbid") long dbid, HttpServletRequest request, HttpServletResponse response) {
+
+        try {
+            String url = String.format("/#/rechargeList?" +
+                            "card_id=%s&encrypt_code=%s&openidCard=%s&outer_str=%s&dbid=%s&loginName=%s&uid=%s",
+                    request.getParameter("card_id"), request.getParameter("encrypt_code"),
+                    request.getParameter("openid"), request.getParameter("outer_str"), dbid, lname, uid);
+            log.info("rechargeRecord url={}", url);
+            response.sendRedirect(url);
+        } catch (IOException e) {
+            log.error("查询充值记录失败：" + e.getMessage());
+        }
+
+    }
+
+
     @RequestMapping(value = "/weChat/route/{dbid}")
     @ResponseBody
     public JSONObject wechatRoute(@PathVariable String dbid,
@@ -98,6 +115,14 @@ public class WxOpenController {
             log.info("转发请求异常", e);
             throw new CustomException("200", "转发请求异常" + e.getMessage());
         }
+
+    }
+
+    @RequestMapping(value = "/recharge/list/{dbid}")
+    @ResponseBody
+    public JSONObject rechargeList(@PathVariable String dbid, HttpServletRequest request) {
+
+        return wxService.rechargeList(dbid,request);
 
     }
 

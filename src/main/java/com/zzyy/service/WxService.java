@@ -30,4 +30,6 @@ public interface WxService {
     void notify(String appId, HttpServletRequest request);
 
     JSONObject wechatRoute(String dbid, HttpServletRequest request) throws Exception;
+
+    JSONObject rechargeList(String dbid, HttpServletRequest request);
 }

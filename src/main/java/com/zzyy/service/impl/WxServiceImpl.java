@@ -1,5 +1,6 @@
 package com.zzyy.service.impl;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.zzyy.entity.WxVerifyTicket;
 import com.zzyy.exception.CustomException;
@@ -561,7 +562,90 @@ public class WxServiceImpl implements com.zzyy.service.WxService {
         String body = params.containsKey("body") ? params.getString("body") : "";
 
         //根据dbid获取到头信息
+        Map<String, String> header = getHeaderByDBID(dbid);
 
+        String res = WxTokenUtils.sendPost(url, body, header);
+        log.info("转发V7请求返回" + res);
+        if (StringUtils.isNotBlank(res)) {
+            return JSONObject.parseObject(res);
+        } else {
+            return new JSONObject();
+        }
+    }
+
+    @Override
+    public JSONObject rechargeList(String dbid, HttpServletRequest request) {
+
+        //根据dbid获取到头信息
+        Map<String, String> header = getHeaderByDBID(dbid);
+        String url = "https://tf-feature1.jdy.com/ierp/innernal-api/app/lsbd/query";
+        String card_id = request.getParameter("card_id");
+        String openidCard = request.getParameter("openid");
+        String pageindex = request.getParameter("pageindex");
+        String pagesize = request.getParameter("pagesize");
+
+        JSONObject params = new JSONObject();
+        //获取手机号
+        params.put("selectFields", "id,mobile");
+        params.put("billType", "wx_mb_drawcard");
+        JSONArray filter = new JSONArray();
+        JSONObject openid = new JSONObject();
+        openid.put("name", "openid");
+        openid.put("cp", "=");
+        openid.put("value", openidCard);
+        filter.add(openid);
+
+        JSONObject cardId = new JSONObject();
+        cardId.put("name", "cardid");
+        cardId.put("cp", "=");
+        cardId.put("value", card_id);
+        filter.add(cardId);
+
+        params.put("filter", filter);
+
+        String res = WxTokenUtils.sendPost(url, params.toJSONString(), header);
+        log.info("查询手机号返回：" + res);
+
+        String mobile = "";
+
+        JSONObject object = JSONObject.parseObject(res);
+        boolean success = object.containsKey("success") ? object.getBooleanValue("success") : false;
+        if (success) {
+            JSONObject data = object.getJSONObject("data");
+            JSONArray array = data.getJSONArray("rows");
+            JSONObject row = array.size() > 0 ? array.getJSONObject(0) : new JSONObject();
+            mobile = row.containsKey("mobile") ? row.getString("mobile") : "";
+
+        } else {
+            throw new CustomException("500", "身份校验异常,查询不到手机号");
+        }
+
+        params.clear();
+        filter.clear();
+
+        params.put("selectFields", "id,storeid,rechargeamt,rechargetime");
+        params.put("billType", "recharge_record");
+        params.put("page", pageindex);
+        params.put("pagesize", pagesize);
+
+        JSONObject fi = new JSONObject();
+        fi.put("name", "memberid.mobile");
+        fi.put("cp", "=");
+        fi.put("value", mobile);
+        filter.add(fi);
+
+        params.put("filter", filter);
+
+        res = WxTokenUtils.sendPost(url, params.toJSONString(), header);
+        log.info("查询充值记录返回：" + res);
+        if (StringUtils.isNotBlank(res)) {
+            return JSONObject.parseObject(res);
+        } else {
+            return new JSONObject();
+        }
+    }
+
+    private Map<String, String> getHeaderByDBID(String dbid) {
         Map<String, Object> pa = new HashMap<>();
         pa.put("dbid", dbid);
         pa.put("appId", WxTokenUtils.APPID);
@@ -573,13 +657,7 @@ public class WxServiceImpl implements com.zzyy.service.WxService {
         header.put("tenantId", byParams.getTenantId());
         header.put("userName", byParams.getUsername());
 
-        String res = WxTokenUtils.sendPost(url, body, header);
-        log.info("转发V7请求返回");
-        if (StringUtils.isNotBlank(res)) {
-            return JSONObject.parseObject(res);
-        } else {
-            return new JSONObject();
-        }
+        return header;
     }
 
     protected static String getRequestPostStr(HttpServletRequest request) throws IOException {

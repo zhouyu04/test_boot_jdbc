@@ -32,4 +32,6 @@ public interface WxService {
     JSONObject wechatRoute(String dbid, HttpServletRequest request) throws Exception;
 
     JSONObject rechargeList(String dbid, HttpServletRequest request);
+
+    JSONObject retailList(String dbid, HttpServletRequest request);
 }

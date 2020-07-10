@@ -88,7 +88,8 @@ public class WxOpenController {
 
 
     @RequestMapping(value = "/weChat/recharge/{lname}/{uid}", produces = "text/html;charset=UTF-8")
-    public void recharge(@PathVariable String lname, @PathVariable long uid, @RequestParam("dbid") long dbid, HttpServletRequest request, HttpServletResponse response) {
+    public void recharge(@PathVariable String lname, @PathVariable long uid, @RequestParam("dbid") long dbid,
+                         HttpServletRequest request, HttpServletResponse response) {
 
         try {
             String url = String.format("/#/rechargeList?" +
@@ -99,6 +100,23 @@ public class WxOpenController {
             response.sendRedirect(url);
         } catch (IOException e) {
             log.error("查询充值记录失败：" + e.getMessage());
+        }
+
+    }
+
+    @RequestMapping(value = "/weChat/retail/{lname}/{uid}", produces = "text/html;charset=UTF-8")
+    public void retial(@PathVariable String lname, @PathVariable long uid, @RequestParam("dbid") long dbid,
+                       HttpServletRequest request, HttpServletResponse response) {
+
+        try {
+            String url = String.format("/#/retailList?" +
+                            "card_id=%s&encrypt_code=%s&openidCard=%s&outer_str=%s&fdbid=%s&loginName=%s&uid=%s",
+                    request.getParameter("card_id"), request.getParameter("encrypt_code"),
+                    request.getParameter("openid"), request.getParameter("outer_str"), dbid, lname, uid);
+            log.info("rechargeRecord url={}", url);
+            response.sendRedirect(url);
+        } catch (IOException e) {
+            log.error("查询消费记录记录失败：" + e.getMessage());
         }
 
     }
@@ -122,7 +140,16 @@ public class WxOpenController {
     @ResponseBody
     public JSONObject rechargeList(@PathVariable String dbid, HttpServletRequest request) {
 
-        return wxService.rechargeList(dbid,request);
+        return wxService.rechargeList(dbid, request);
+
+    }
+
+
+    @RequestMapping(value = "/retail/list/{dbid}")
+    @ResponseBody
+    public JSONObject retailList(@PathVariable String dbid, HttpServletRequest request) {
+
+        return wxService.retailList(dbid, request);
 
     }
 

@@ -584,6 +584,81 @@ public class WxServiceImpl implements com.zzyy.service.WxService {
         String pageindex = request.getParameter("pageindex");
         String pagesize = request.getParameter("pagesize");
 
+        String mobile = getMobile(header, card_id, openidCard);
+
+        JSONObject params = new JSONObject();
+        JSONArray filter = new JSONArray();
+
+        params.put("selectFields", "id,storeid,rechargeamt,rechargetime");
+        params.put("billType", "recharge_record");
+        params.put("page", pageindex);
+        params.put("pagesize", pagesize);
+
+        JSONObject fi = new JSONObject();
+        fi.put("name", "memberid.mobile");
+        fi.put("cp", "=");
+        fi.put("value", mobile);
+        filter.add(fi);
+
+        params.put("filter", filter);
+
+        String res = WxTokenUtils.sendPost(url, params.toJSONString(), header);
+        log.info("查询充值记录返回：" + res);
+        if (StringUtils.isNotBlank(res)) {
+            return JSONObject.parseObject(res);
+        } else {
+            return new JSONObject();
+        }
+    }
+
+    @Override
+    public JSONObject retailList(String dbid, HttpServletRequest request) {
+        //根据dbid获取到头信息
+        Map<String, String> header = getHeaderByDBID(dbid);
+        String url = "https://tf-feature1.jdy.com/ierp/innernal-api/app/lsbd/query";
+
+        String card_id = request.getParameter("card_id");
+        String openidCard = request.getParameter("openid");
+        String pageindex = request.getParameter("pageindex");
+        String pagesize = request.getParameter("pagesize");
+
+        String mobile = getMobile(header, card_id, openidCard);
+
+        JSONObject params = new JSONObject();
+        JSONArray filter = new JSONArray();
+
+        params.put("selectFields", "id,date,storeid,bizType,billno,amount,memberid");
+        params.put("billType", "store_bill");
+        params.put("page", pageindex);
+        params.put("pagesize", pagesize);
+        params.put("orderby", "date desc");
+
+        JSONObject fi = new JSONObject();
+        fi.put("name", "memberid.mobile");
+        fi.put("cp", "=");
+        fi.put("value", mobile);
+        filter.add(fi);
+        JSONObject bizType = new JSONObject();
+        bizType.put("name", "bizType");
+        bizType.put("cp", "in");
+        bizType.put("value", new int[]{62, 63});
+
+        params.put("filter", filter);
+
+        String res = WxTokenUtils.sendPost(url, params.toJSONString(), header);
+        log.info("查询消费记录返回：" + res);
+        if (StringUtils.isNotBlank(res)) {
+            return JSONObject.parseObject(res);
+        } else {
+            return new JSONObject();
+        }
+    }
+
+    private String getMobile(Map<String, String> header, String card_id, String openidCard) {
+
+        String url = "https://tf-feature1.jdy.com/ierp/innernal-api/app/lsbd/query";
+
+        String mobile = "";
         JSONObject params = new JSONObject();
         //获取手机号
         params.put("selectFields", "id,mobile");
@@ -606,8 +681,6 @@ public class WxServiceImpl implements com.zzyy.service.WxService {
         String res = WxTokenUtils.sendPost(url, params.toJSONString(), header);
         log.info("查询手机号返回：" + res);
 
-        String mobile = "";
-
         JSONObject object = JSONObject.parseObject(res);
         boolean success = object.containsKey("success") ? object.getBooleanValue("success") : false;
         if (success) {
@@ -620,29 +693,7 @@ public class WxServiceImpl implements com.zzyy.service.WxService {
             throw new CustomException("500", "身份校验异常,查询不到手机号");
         }
 
-        params.clear();
-        filter.clear();
-
-        params.put("selectFields", "id,storeid,rechargeamt,rechargetime");
-        params.put("billType", "recharge_record");
-        params.put("page", pageindex);
-        params.put("pagesize", pagesize);
-
-        JSONObject fi = new JSONObject();
-        fi.put("name", "memberid.mobile");
-        fi.put("cp", "=");
-        fi.put("value", mobile);
-        filter.add(fi);
-
-        params.put("filter", filter);
-
-        res = WxTokenUtils.sendPost(url, params.toJSONString(), header);
-        log.info("查询充值记录返回：" + res);
-        if (StringUtils.isNotBlank(res)) {
-            return JSONObject.parseObject(res);
-        } else {
-            return new JSONObject();
-        }
+        return mobile;
     }
 
     private Map<String, String> getHeaderByDBID(String dbid) {

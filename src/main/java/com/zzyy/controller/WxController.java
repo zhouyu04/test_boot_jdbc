@@ -30,7 +30,7 @@ public class WxController {
     @ResponseBody
     public String notify(@PathVariable String appId, HttpServletRequest request) {
 
-        wxService.notify(appId,request);
+        wxService.notify(appId, request);
 
         return "";
     }
@@ -51,18 +51,17 @@ public class WxController {
 
 
     @RequestMapping("/callback/{appId}/{username}/{dbid}/{tenantid}")
-    public String callback(HttpServletRequest request,
-                           @PathVariable String appId,
-                           @PathVariable String username,
-                           @PathVariable String dbid,
-                           @PathVariable String tenantid) {
+    public void callback(HttpServletRequest request,
+                         @PathVariable String appId,
+                         @PathVariable String username,
+                         @PathVariable String dbid,
+                         @PathVariable String tenantid) {
         request.setAttribute("appId", appId);
         request.setAttribute("username", username);
         request.setAttribute("dbid", dbid);
         request.setAttribute("tenantid", tenantid);
 
         wxService.callback(request);
-        return "index";
     }
 
 

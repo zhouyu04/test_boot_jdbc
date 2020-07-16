@@ -29,29 +29,7 @@ public class IndexController {
         return "login";
     }
 
-    @RequestMapping(value = "/index", method = RequestMethod.GET)
-    public String index(HttpServletRequest request, HttpServletResponse response) {
 
-        String queryString = request.getQueryString();
-        logger.info("queryString:" + queryString);
-        String appId = StringUtils.isBlank(request.getParameter("appId"))
-                ? "wxb6051228351f2072" : request.getParameter("appId");
-        String username = StringUtils.isBlank(request.getParameter("username"))
-                ? "administrator" : request.getParameter("username");
-        String dbid = StringUtils.isBlank(request.getParameter("dbid"))
-                ? "19002" : request.getParameter("dbid");
-        String tenantid = StringUtils.isBlank(request.getParameter("tenantid"))
-                ? "jdy" : request.getParameter("tenantid");
-
-        request.setAttribute("appId", appId);
-        request.setAttribute("username", username);
-        request.setAttribute("dbid", dbid);
-        request.setAttribute("tenantid", tenantid);
-
-
-        logger.info("index");
-        return "index";
-    }
 
     @RequestMapping(value = "/toChat", method = RequestMethod.GET)
     public String toChat() {

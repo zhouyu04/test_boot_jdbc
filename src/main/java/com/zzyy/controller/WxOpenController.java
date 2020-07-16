@@ -7,11 +7,10 @@ import com.zzyy.service.WxService;
 import com.zzyy.utils.wx.WxTokenUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -30,8 +29,43 @@ import java.util.HashMap;
 @Slf4j
 public class WxOpenController {
 
+    private static Logger logger = LoggerFactory.getLogger(WxOpenController.class);
+
     @Resource
     WxService wxService;
+
+    /**
+     * 功能描述: 跳转微信授权
+     *
+     * @auther: zhouyu
+     * @date: 2020/7/15 10:17
+     */
+    @RequestMapping(value = "/index", method = RequestMethod.GET)
+    public void index(HttpServletRequest request, HttpServletResponse response) {
+
+        String appId = StringUtils.isBlank(request.getParameter("appId"))
+                ? "wxb6051228351f2072" : request.getParameter("appId");
+        String username = StringUtils.isBlank(request.getParameter("username"))
+                ? "administrator" : request.getParameter("username");
+        String dbid = StringUtils.isBlank(request.getParameter("dbid"))
+                ? "19002" : request.getParameter("dbid");
+        String tenantid = StringUtils.isBlank(request.getParameter("tenantid"))
+                ? "jdy" : request.getParameter("tenantid");
+
+        request.setAttribute("appId", appId);
+        request.setAttribute("username", username);
+        request.setAttribute("dbid", dbid);
+        request.setAttribute("tenantid", tenantid);
+
+        String url = String.format("/#/auth?" +
+                        "appId=%s&username=%s&dbid=%s&tenantid=%s",
+                appId, username, dbid, tenantid);
+        try {
+            response.sendRedirect(url);
+        } catch (IOException e) {
+            logger.error("跳转微信授权失败", e);
+        }
+    }
 
     @RequestMapping(value = "/weChat/getUserInfo/{lname}/{uid}", produces = "text/html;charset=UTF-8")
     public void getUserInfo(@PathVariable String lname, @PathVariable long uid,
@@ -184,7 +218,6 @@ public class WxOpenController {
         }
 
     }
-
 
 
     @RequestMapping(value = "/weChat/route/{dbid}")

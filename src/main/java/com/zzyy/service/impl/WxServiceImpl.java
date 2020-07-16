@@ -615,7 +615,7 @@ public class WxServiceImpl implements com.zzyy.service.WxService {
     public JSONObject retailList(String dbid, HttpServletRequest request) {
         //根据dbid获取到头信息
         Map<String, String> header = getHeaderByDBID(dbid);
-        String url = "https://tf-feature1.jdy.com/ierp/innernal-api/app/lsbd/query";
+
 
         String card_id = request.getParameter("card_id");
         String openidCard = request.getParameter("openid");
@@ -624,26 +624,9 @@ public class WxServiceImpl implements com.zzyy.service.WxService {
 
         String mobile = getMobile(header, card_id, openidCard);
 
+        String url = "https://tf-feature1.jdy.com/ierp/innernal-api/app/store/wx_retail";
         JSONObject params = new JSONObject();
-        JSONArray filter = new JSONArray();
-
-        params.put("selectFields", "id,date,storeid,bizType,billno,amount,memberid");
-        params.put("billType", "store_bill");
-        params.put("page", pageindex);
-        params.put("pagesize", pagesize);
-        params.put("orderby", "date desc");
-
-        JSONObject fi = new JSONObject();
-        fi.put("name", "memberid.mobile");
-        fi.put("cp", "=");
-        fi.put("value", mobile);
-        filter.add(fi);
-        JSONObject bizType = new JSONObject();
-        bizType.put("name", "bizType");
-        bizType.put("cp", "in");
-        bizType.put("value", new int[]{62, 63});
-
-        params.put("filter", filter);
+        params.put("mobile", mobile);
 
         String res = WxTokenUtils.sendPost(url, params.toJSONString(), header);
         log.info("查询消费记录返回：" + res);

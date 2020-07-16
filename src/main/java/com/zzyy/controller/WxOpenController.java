@@ -87,6 +87,12 @@ public class WxOpenController {
     }
 
 
+    /**
+     * 功能描述: 跳转充值记录
+     *
+     * @auther: zhouyu
+     * @date: 2020/7/15 10:17
+     */
     @RequestMapping(value = "/weChat/recharge/{lname}/{uid}", produces = "text/html;charset=UTF-8")
     public void recharge(@PathVariable String lname, @PathVariable long uid, @RequestParam("dbid") long dbid,
                          HttpServletRequest request, HttpServletResponse response) {
@@ -104,6 +110,26 @@ public class WxOpenController {
 
     }
 
+    /**
+     * 功能描述: 充值记录查询
+     *
+     * @auther: zhouyu
+     * @date: 2020/7/15 10:17
+     */
+    @RequestMapping(value = "/recharge/list/{dbid}")
+    @ResponseBody
+    public JSONObject rechargeList(@PathVariable String dbid, HttpServletRequest request) {
+
+        return wxService.rechargeList(dbid, request);
+
+    }
+
+    /**
+     * 功能描述: 跳转消费记录
+     *
+     * @auther: zhouyu
+     * @date: 2020/7/15 10:16
+     */
     @RequestMapping(value = "/weChat/retail/{lname}/{uid}", produces = "text/html;charset=UTF-8")
     public void retial(@PathVariable String lname, @PathVariable long uid, @RequestParam("dbid") long dbid,
                        HttpServletRequest request, HttpServletResponse response) {
@@ -121,6 +147,45 @@ public class WxOpenController {
 
     }
 
+    /**
+     * 功能描述: 消费记录查询
+     *
+     * @auther: zhouyu
+     * @date: 2020/7/15 10:17
+     */
+    @RequestMapping(value = "/retail/list/{dbid}")
+    @ResponseBody
+    public JSONObject retailList(@PathVariable String dbid, HttpServletRequest request) {
+
+        return wxService.retailList(dbid, request);
+
+    }
+
+
+    /**
+     * 功能描述: 老会员绑定跳转
+     *
+     * @auther: zhouyu
+     * @date: 2020/7/15 10:47
+     */
+    @RequestMapping(value = "/bindOldMember/{lname}/{uid}")
+    public void bindOldMember(@PathVariable String lname, @PathVariable long uid, @RequestParam("dbid") long dbid,
+                              HttpServletRequest request, HttpServletResponse response) {
+        try {
+            String url = String.format("/#/bindOldMember?" +
+                            "card_id=%s&encrypt_code=%s&openidCard=%s&outer_str=%s&fdbid=%s&loginName=%s&uid=%s",
+                    request.getParameter("card_id"), request.getParameter("encrypt_code"),
+                    request.getParameter("openid"), request.getParameter("outer_str"), dbid, lname, uid);
+
+            log.info("rechargeRecord url={}", url);
+            response.sendRedirect(url);
+        } catch (IOException e) {
+            log.error("跳转老会员绑定失败：" + e.getMessage());
+        }
+
+    }
+
+
 
     @RequestMapping(value = "/weChat/route/{dbid}")
     @ResponseBody
@@ -136,21 +201,5 @@ public class WxOpenController {
 
     }
 
-    @RequestMapping(value = "/recharge/list/{dbid}")
-    @ResponseBody
-    public JSONObject rechargeList(@PathVariable String dbid, HttpServletRequest request) {
-
-        return wxService.rechargeList(dbid, request);
-
-    }
-
-
-    @RequestMapping(value = "/retail/list/{dbid}")
-    @ResponseBody
-    public JSONObject retailList(@PathVariable String dbid, HttpServletRequest request) {
-
-        return wxService.retailList(dbid, request);
-
-    }
 
 }

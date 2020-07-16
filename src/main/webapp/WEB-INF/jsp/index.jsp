@@ -23,10 +23,19 @@
     <input type="submit" value="upload"/>
 </form>--%>
 
-appID:<input id="appid" value="${appId}" name=""><br>
-username:<input id="username" value="${username}" name=""><br>
-dbid:<input id="dbid" value="${dbid}" name=""><br>
-tenantid:<input id="tenantid" value="${tenantid}" name=""><br>
-<a href="/wx/getPreCode?appid=${appId}&username=${username}&dbid=${dbid}&tenantid=${tenantid}">授权</a>
+<%--appID:<input id="appid" value="${appId}" name="" hidden="true"><br>--%>
+<%--username:<input id="username" value="${username}" name="" hidden="true"><br>--%>
+<%--dbid:<input id="dbid" value="${dbid}" name="" hidden="true"><br>--%>
+<%--tenantid:<input id="tenantid" value="${tenantid}" name="" hidden="true"><br>--%>
+<a hidden="true" href="/wx/getPreCode?appid=${appId}&username=${username}&dbid=${dbid}&tenantid=${tenantid}" id="a_url">授权</a>
 </body>
+
+<script>
+
+    var aLinkDom = document.getElementById('a_url').getAttribute('href')
+    if (aLinkDom != null) {
+        window.location.href = (aLinkDom)
+    }
+
+</script>
 </html>

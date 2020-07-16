@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * @Auther: zhouyu
@@ -51,7 +53,7 @@ public class WxController {
 
 
     @RequestMapping("/callback/{appId}/{username}/{dbid}/{tenantid}")
-    public void callback(HttpServletRequest request,
+    public void callback(HttpServletRequest request, HttpServletResponse response,
                          @PathVariable String appId,
                          @PathVariable String username,
                          @PathVariable String dbid,
@@ -62,6 +64,13 @@ public class WxController {
         request.setAttribute("tenantid", tenantid);
 
         wxService.callback(request);
+
+        String url = String.format("/#/success");
+        try {
+            response.sendRedirect(url);
+        } catch (IOException e) {
+            log.error("跳转成功页面失败", e);
+        }
     }
 
 

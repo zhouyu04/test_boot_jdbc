@@ -1,6 +1,7 @@
 package com.zzyy.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.zzyy.interceptor.JResponse;
 import com.zzyy.service.WxService;
 import com.zzyy.utils.wx.WxTokenUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +23,7 @@ import java.io.IOException;
 @Controller
 @RequestMapping("/wx")
 @Slf4j
-public class WxController {
+public class WxController extends BaseController {
 
     @Resource
     WxService wxService;
@@ -30,25 +31,26 @@ public class WxController {
 
     @RequestMapping("/notify/{appId}")
     @ResponseBody
-    public String notify(@PathVariable String appId, HttpServletRequest request) {
+    public JResponse<Object> notify(@PathVariable String appId, HttpServletRequest request) {
 
         wxService.notify(appId, request);
 
-        return "";
+        return this.result();
     }
 
     @RequestMapping("/info")
     @ResponseBody
-    public String info(HttpServletRequest request) {
+    public JResponse<String> info(HttpServletRequest request) {
 
 
         try {
             wxService.saveVerifyTicket(request);
         } catch (Exception e) {
             log.error("转换XML异常：" + e);
+            return this.result("fail");
         }
 
-        return "success";
+        return this.result("success");
     }
 
 
@@ -75,7 +77,7 @@ public class WxController {
 
 
     @RequestMapping("/getPreCode")
-    public String getPreCode(HttpServletRequest request) {
+    public void getPreCode(HttpServletRequest request, HttpServletResponse response) {
 
         String preCode = wxService.getPreCode();
 
@@ -102,16 +104,20 @@ public class WxController {
                 + appId + "/" + username + "/" + dbid + "/" + tenantid;
         //appid_username_dbid_tenantid
 
-        return "redirect:" + url;
+        try {
+            response.sendRedirect(url);
+        } catch (IOException e) {
+            log.error("跳转授权页面失败", e);
+        }
 
     }
 
 
     @RequestMapping("/getTicket")
     @ResponseBody
-    public String getTicket() {
+    public JResponse<String> getTicket() {
 
-        return wxService.getTicket();
+        return this.result(wxService.getTicket());
     }
 
 
@@ -123,10 +129,10 @@ public class WxController {
      */
     @RequestMapping("/access")
     @ResponseBody
-    public String getAccess(HttpServletRequest request) {
+    public JResponse<String> getAccess(HttpServletRequest request) {
 
         String dbid = request.getParameter("dbid");
-        return wxService.getAccess(dbid);
+        return this.result(wxService.getAccess(dbid));
     }
 
     /**
@@ -137,9 +143,9 @@ public class WxController {
      */
     @RequestMapping("/getcomptoken")
     @ResponseBody
-    public JSONObject getcomptoken() {
+    public JResponse<JSONObject> getcomptoken() {
 
-        return wxService.getcomptoken();
+        return this.result(wxService.getcomptoken());
     }
 
     /**
@@ -150,10 +156,10 @@ public class WxController {
      */
     @RequestMapping("/checkAuthorize")
     @ResponseBody
-    public JSONObject checkAuthorize(HttpServletRequest request) {
+    public JResponse<JSONObject> checkAuthorize(HttpServletRequest request) {
 
         String dbid = request.getParameter("dbid");
-        return wxService.checkAuthorize(dbid);
+        return this.result(wxService.checkAuthorize(dbid));
     }
 
     //解除绑定

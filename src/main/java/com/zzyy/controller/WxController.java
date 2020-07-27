@@ -14,6 +14,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URLEncoder;
 
 /**
  * @Auther: zhouyu
@@ -96,15 +97,13 @@ public class WxController extends BaseController {
         params.put("dbid", dbid);
         params.put("tenantid", tenantid);
 
-        String url = "https://mp.weixin.qq.com/cgi-bin/componentloginpage?component_appid="
-                + WxTokenUtils.APPID
-                + "&pre_auth_code=" + preCode
-                + "&auth_type=1"
-                + "&redirect_uri=http://120.77.156.51/wx/callback/"
-                + appId + "/" + username + "/" + dbid + "/" + tenantid;
-        //appid_username_dbid_tenantid
-
         try {
+            String url = "https://mp.weixin.qq.com/cgi-bin/componentloginpage?component_appid="
+                    + WxTokenUtils.APPID
+                    + "&pre_auth_code=" + preCode
+                    + "&auth_type=1"
+                    + "&redirect_uri=http://120.77.156.51/wx/callback/"
+                    + appId + "/" + URLEncoder.encode(username, "utf-8") + "/" + dbid + "/" + tenantid;
             response.sendRedirect(url);
         } catch (IOException e) {
             log.error("跳转授权页面失败", e);

@@ -29,7 +29,7 @@ import java.util.HashMap;
 @Slf4j
 public class WxOpenController {
 
-    private static Logger logger = LoggerFactory.getLogger(WxOpenController.class);
+    private static final Logger logger = LoggerFactory.getLogger(WxOpenController.class);
 
     @Resource
     WxService wxService;
@@ -57,7 +57,7 @@ public class WxOpenController {
         request.setAttribute("dbid", dbid);
         request.setAttribute("tenantid", tenantid);
 
-        String url = String.format("/#/auth?" +
+        String url = String.format("/member/#/auth?" +
                         "appId=%s&username=%s&dbid=%s&tenantid=%s",
                 appId, username, dbid, tenantid);
         try {
@@ -132,7 +132,7 @@ public class WxOpenController {
                          HttpServletRequest request, HttpServletResponse response) {
 
         try {
-            String url = String.format("/#/rechargeList?" +
+            String url = String.format("/member/#/rechargeList?" +
                             "card_id=%s&encrypt_code=%s&openidCard=%s&outer_str=%s&fdbid=%s&loginName=%s&uid=%s",
                     request.getParameter("card_id"), request.getParameter("encrypt_code"),
                     request.getParameter("openid"), request.getParameter("outer_str"), dbid, lname, uid);
@@ -169,7 +169,7 @@ public class WxOpenController {
                        HttpServletRequest request, HttpServletResponse response) {
 
         try {
-            String url = String.format("/#/retailList?" +
+            String url = String.format("/member/#/retailList?" +
                             "card_id=%s&encrypt_code=%s&openidCard=%s&outer_str=%s&fdbid=%s&loginName=%s&uid=%s",
                     request.getParameter("card_id"), request.getParameter("encrypt_code"),
                     request.getParameter("openid"), request.getParameter("outer_str"), dbid, lname, uid);
@@ -206,7 +206,7 @@ public class WxOpenController {
     public void bindOldMember(@PathVariable String lname, @PathVariable long uid, @RequestParam("dbid") long dbid,
                               HttpServletRequest request, HttpServletResponse response) {
         try {
-            String url = String.format("/#/bindOldMember?" +
+            String url = String.format("/member/#/bindOldMember?" +
                             "card_id=%s&encrypt_code=%s&openidCard=%s&outer_str=%s&fdbid=%s&loginName=%s&uid=%s",
                     request.getParameter("card_id"), request.getParameter("encrypt_code"),
                     request.getParameter("openid"), request.getParameter("outer_str"), dbid, lname, uid);
@@ -229,7 +229,7 @@ public class WxOpenController {
             return wxService.wechatRoute(dbid, request);
         } catch (Exception e) {
             log.info("转发请求异常", e);
-            throw new CustomException("200", "转发请求异常" + e.getMessage());
+            throw new RuntimeException("转发请求异常" + e.getMessage());
         }
 
     }

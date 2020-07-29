@@ -24,7 +24,7 @@ public interface WxService {
 
     JSONObject checkAuthorize(String dbid);
 
-    JSONObject recall(String dbid);
+    void recall(String dbid);
 
     void notify(String appId, HttpServletRequest request);
 

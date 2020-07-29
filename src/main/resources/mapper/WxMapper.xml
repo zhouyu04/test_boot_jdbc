@@ -41,7 +41,8 @@
     </update>
 
     <select id="findByParams" resultType="com.zzyy.entity.WxVerifyTicket">
-        select fdbid as "dbid",fusername as "username",ftenantid as "tenantId",fappid as "appId",finfotype as "infoType",
+        select fdbid as "dbid",fusername as "username",ftenantid as "tenantId",fappid as "appId",finfotype as
+        "infoType",
         fverifyticket as "ticket",
         fauthorizerappid as "authorizerAppid",fauthorizationcode as "authorizationCode",fpreauthcode as "preAuthCode",
         faccesstoken as "accessToken",frefreshtoken as "refreshToken"
@@ -74,5 +75,9 @@
         </if>
         where fid = #{id}
     </update>
+
+    <delete id="deleteBydbid">
+        delete from t_wx_ticket where fdbid = #{dbid} and finfotype = 'authorization_info'
+    </delete>
 
 </mapper>

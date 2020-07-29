@@ -25,4 +25,6 @@ public interface WxMapper {
     WxVerifyTicket findAccessToken(@Param("appId") String appid, @Param("authAppId") String authorizer_appid);
 
     void updateToken(WxVerifyTicket wt);
+
+    void deleteBydbid(String dbid);
 }

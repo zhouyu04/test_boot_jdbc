@@ -450,35 +450,9 @@ public class WxServiceImpl implements com.zzyy.service.WxService {
     }
 
     @Override
-    public JSONObject recall(String dbid) {
+    public void recall(String dbid) {
 
-        //查询授权信息
-        Map<String, Object> params = new HashMap<>();
-        params.put("dbid", dbid);
-        params.put("infoType", "authorization_info");
-        params.put("appId", WxTokenUtils.APPID);
-        WxVerifyTicket byParams = wxMapper.findByParams(params);
-
-        JSONObject getcomptoken = getcomptoken();
-        String url = "https://api.weixin.qq.com/cgi-bin/open/unbind?access_token=" + getcomptoken;
-
-        JSONObject param = new JSONObject();
-        param.put("appid", byParams.getAuthorizerAppid());
-        param.put("open_appid", byParams.getAppId());
-
-        String s = WxTokenUtils.sendPost(url, param.toJSONString(), new HashMap<>());
-        log.info("微信解绑返回：" + s);
-        if (StringUtils.isBlank(s)) {
-            throw new CustomException("500", "微信解绑异常，返回为空");
-        }
-        JSONObject object = JSONObject.parseObject(s);
-
-        int errcode = object.containsKey("errcode") ? object.getIntValue("errcode") : 500;
-        if (errcode != 0) {
-            throw new CustomException("500", "微信解绑失败" + s);
-        }
-
-        return object;
+        wxMapper.deleteBydbid(dbid);
     }
 
     @Override

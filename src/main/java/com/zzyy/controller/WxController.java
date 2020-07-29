@@ -161,13 +161,19 @@ public class WxController extends BaseController {
         return this.result(wxService.checkAuthorize(dbid));
     }
 
-    //解除绑定
+    /**
+     * 功能描述: 取消授权-只是删除数据库数据，并没有调用微信
+     *
+     * @auther: zhouyu
+     * @date: 2020/7/29 17:07
+     */
     @RequestMapping("/recall")
     @ResponseBody
-    public JSONObject recall(HttpServletRequest request) {
+    public JResponse<Object> recall(HttpServletRequest request) {
 
         String dbid = request.getParameter("dbid");
-        return wxService.recall(dbid);
+        wxService.recall(dbid);
+        return this.result();
 
     }
 

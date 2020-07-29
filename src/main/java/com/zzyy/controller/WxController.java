@@ -103,7 +103,7 @@ public class WxController extends BaseController {
                     + "&pre_auth_code=" + preCode
                     + "&auth_type=1"
                     + "&redirect_uri=http://120.77.156.51/wx/callback/"
-                    + appId + "/" + URLEncoder.encode(username, "utf-8") + "/" + dbid + "/" + tenantid;
+                    + appId + "/" + URLEncoder.encode(username, "GBK") + "/" + dbid + "/" + tenantid;
             response.sendRedirect(url);
         } catch (IOException e) {
             log.error("跳转授权页面失败", e);

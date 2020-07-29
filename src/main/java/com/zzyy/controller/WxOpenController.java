@@ -2,7 +2,6 @@ package com.zzyy.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.zzyy.exception.CustomException;
 import com.zzyy.service.WxService;
 import com.zzyy.utils.wx.WxTokenUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +45,7 @@ public class WxOpenController {
         String appId = StringUtils.isBlank(request.getParameter("appId"))
                 ? "wxb6051228351f2072" : request.getParameter("appId");
         String username = StringUtils.isBlank(request.getParameter("username"))
-                ? "administrator" : request.getParameter("username");
+                ? "中文" : request.getParameter("username");
         String dbid = StringUtils.isBlank(request.getParameter("dbid"))
                 ? "19002" : request.getParameter("dbid");
         String tenantid = StringUtils.isBlank(request.getParameter("tenantid"))
@@ -57,10 +56,10 @@ public class WxOpenController {
         request.setAttribute("dbid", dbid);
         request.setAttribute("tenantid", tenantid);
 
-        String url = String.format("/member/#/auth?" +
-                        "appId=%s&username=%s&dbid=%s&tenantid=%s",
-                appId, username, dbid, tenantid);
         try {
+            String url = String.format("/member/#/auth?" +
+                            "appId=%s&username=%s&dbid=%s&tenantid=%s",
+                    appId, URLEncoder.encode(username, "GBK"), dbid, tenantid);
             response.sendRedirect(url);
         } catch (IOException e) {
             logger.error("跳转微信授权失败", e);

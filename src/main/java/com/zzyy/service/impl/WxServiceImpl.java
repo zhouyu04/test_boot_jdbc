@@ -227,17 +227,34 @@ public class WxServiceImpl implements com.zzyy.service.WxService {
         }
 
         JSONObject authorization_info = object.getJSONObject("authorization_info");
-        WxVerifyTicket wt = new WxVerifyTicket();
-        wt.setDbid(dbid);
-        wt.setUsername(username);
-        wt.setTenantId(tenantid);
-        wt.setAppId(WxTokenUtils.APPID);
-        wt.setInfoType("authorization_info");
-        wt.setAuthorizerAppid(authorization_info.getString("authorizer_appid"));
-        wt.setAccessToken(authorization_info.getString("authorizer_access_token"));
-        wt.setRefreshToken(authorization_info.getString("authorizer_refresh_token"));
+        //查询是否已经存在
+        Map<String, Object> param = new HashMap<>();
+        param.put("appId", WxTokenUtils.APPID);
+        param.put("infoType", "authorization_info");
+        param.put("dbid", dbid);
+        param.put("authorizerAppid", authorization_info.getString("authorizer_appid"));
 
-        wxMapper.saveVerifyTicket(wt);
+        WxVerifyTicket wt = wxMapper.findByParams(param);
+        if (wt == null) {
+            wt = new WxVerifyTicket();
+//            wt.setId(snowflakeIdWorker.nextId());
+            wt.setDbid(dbid);
+            wt.setUsername(username);
+            wt.setTenantId(tenantid);
+            wt.setAppId(WxTokenUtils.APPID);
+            wt.setInfoType("authorization_info");
+            wt.setAuthorizerAppid(authorization_info.getString("authorizer_appid"));
+            wt.setAccessToken(authorization_info.getString("authorizer_access_token"));
+            wt.setRefreshToken(authorization_info.getString("authorizer_refresh_token"));
+
+            wxMapper.saveVerifyTicket(wt);
+        }else {
+            wt.setAccessToken(authorization_info.getString("authorizer_access_token"));
+            wt.setRefreshToken(authorization_info.getString("authorizer_refresh_token"));
+
+            wxMapper.updateToken(wt);
+        }
+
         //这里需要开启一个定时任务定时刷新accesstoken和erfreshtoken
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
@@ -273,34 +290,6 @@ public class WxServiceImpl implements com.zzyy.service.WxService {
 
             }
         }, new Date(), 7000000);//单位为毫秒
-
-
-        //获取到正经回调之后查询授权码和授权appid调用V7接口
-        //1、查询
-//        Map<String, Object> params = new HashMap<>();
-//        params.put("appId", appId);
-//        params.put("infoType", "authorized");
-//        params.put("authCode", auth_code);
-//        WxVerifyTicket wxVerifyTicket = wxMapper.findByParams(params);
-//        //2、todo 调用api将授权回调信息保存至V7
-//        Map<String, String> header = new HashMap<>();
-//
-//        header.put("accountId", dbid);
-//        header.put("tenantId", tenanId);
-//        header.put("userName", username);
-//
-//        JSONObject obj = new JSONObject();
-//
-//        obj.put("appid", appId);
-//        obj.put("infotype", "authorized");
-//        obj.put("authorizerappid", wxVerifyTicket.getAuthorizerAppid());
-//        obj.put("authorizationcode", auth_code);
-//        obj.put("preauthcode", wxVerifyTicket.getPreAuthCode());
-//
-//        url = "https://tf-feature1.jdy.com/ierp/innernal-api/app/mb/wx_auth";
-//        String s1 = WxTokenUtils.sendPost(url, obj.toJSONString(), header);
-//        log.info("调用V7api返回：" + s1);
-
 
     }
 

@@ -64,4 +64,15 @@
         from t_wx_ticket where fappid =#{appId} and finfotype = "authorization_info" and fauthorizerappid = #{authAppId}
     </select>
 
+    <update id="updateToken" parameterType="com.zzyy.entity.WxVerifyTicket">
+        update t_wx_ticket set fmodifytime = now()
+        <if test="accessToken != null">
+            ,faccesstoken = #{accessToken}
+        </if>
+        <if test="refreshToken != null">
+            ,frefreshtoken = #{refreshToken}
+        </if>
+        where fid = #{id}
+    </update>
+
 </mapper>

@@ -41,7 +41,7 @@
     </update>
 
     <select id="findByParams" resultType="com.zzyy.entity.WxVerifyTicket">
-        select fdbid as "dbid",fusername as "username",ftenantid as "tenantId",fappid as "appId",finfotype as
+        select fid as "id" ,fdbid as "dbid",fusername as "username",ftenantid as "tenantId",fappid as "appId",finfotype as
         "infoType",
         fverifyticket as "ticket",
         fauthorizerappid as "authorizerAppid",fauthorizationcode as "authorizationCode",fpreauthcode as "preAuthCode",

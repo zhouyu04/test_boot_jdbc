@@ -12,6 +12,8 @@ import java.util.Date;
 @Data
 public class WxVerifyTicket {
 
+    private String id;
+
     private String dbid;
 
     private String username;
